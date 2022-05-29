@@ -8,6 +8,8 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Stream;
 
+import com.roddyaj.portfoliomanager.model.State;
+
 public abstract class AbstractMonitor
 {
 	private final Path dir;
@@ -16,18 +18,21 @@ public abstract class AbstractMonitor
 
 	protected final String accountNumber;
 
+	private final State state;
+
 	private FileTime dirLastModified;
 
-	private Path accountFile;
+	private Path file;
 
-	public AbstractMonitor(Path dir, String accountName, String accountNumber)
+	public AbstractMonitor(Path dir, String accountName, String accountNumber, State state)
 	{
 		this.dir = dir;
 		this.accountName = accountName;
 		this.accountNumber = accountNumber;
+		this.state = state;
 	}
 
-	public Path check()
+	public boolean check()
 	{
 		boolean updated = false;
 		try
@@ -37,11 +42,12 @@ public abstract class AbstractMonitor
 			{
 				dirLastModified = lastModified;
 
-				Path accountFile = getAccountFile();
-				if (accountFile != null && !accountFile.equals(this.accountFile))
+				Path file = getFile();
+				if (file != null && !file.equals(this.file))
 				{
-					this.accountFile = accountFile;
+					this.file = file;
 					updated = true;
+					updateState(file, state);
 				}
 			}
 		}
@@ -49,12 +55,14 @@ public abstract class AbstractMonitor
 		{
 			e.printStackTrace();
 		}
-		return updated ? accountFile : null;
+		return updated;
 	}
 
-	protected abstract Path getAccountFile();
+	protected abstract Path getFile();
 
-	protected Path getAccountFile(String pattern, Comparator<? super Path> comparator)
+	protected abstract void updateState(Path file, State state);
+
+	protected Path getFile(String pattern, Comparator<? super Path> comparator)
 	{
 		Path file = null;
 		List<Path> files = list(dir, pattern).sorted(comparator).toList();
