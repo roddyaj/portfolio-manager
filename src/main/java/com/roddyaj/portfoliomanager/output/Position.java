@@ -36,6 +36,7 @@ public class Position
 //	String securityType;
 
 	private List<Transaction> transactions;
+	private List<Order> openOrders;
 
 	public String getSymbol()
 	{
@@ -159,13 +160,35 @@ public class Position
 
 	public List<Transaction> getTransactions()
 	{
-		if (transactions == null)
-			transactions = new ArrayList<>();
 		return transactions;
 	}
 
 	public void setTransactions(List<Transaction> transactions)
 	{
 		this.transactions = transactions;
+	}
+
+	public void addTransaction(Transaction transaction)
+	{
+		if (transactions == null)
+			transactions = new ArrayList<>();
+		this.transactions.add(transaction);
+	}
+
+	public List<Order> getOpenOrders()
+	{
+		return openOrders;
+	}
+
+	public void setOpenOrders(List<Order> openOrders)
+	{
+		this.openOrders = openOrders;
+	}
+
+	public void addOpenOrder(Order openOrder)
+	{
+		if (openOrders == null)
+			openOrders = new ArrayList<>();
+		this.openOrders.add(openOrder);
 	}
 }

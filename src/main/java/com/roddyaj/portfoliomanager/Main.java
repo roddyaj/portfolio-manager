@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.roddyaj.portfoliomanager.model.State;
+import com.roddyaj.portfoliomanager.output.Order;
 import com.roddyaj.portfoliomanager.output.Output;
 import com.roddyaj.portfoliomanager.output.Position;
 import com.roddyaj.portfoliomanager.output.Transaction;
@@ -18,6 +19,7 @@ import com.roddyaj.portfoliomanager.schwab.AbstractMonitor;
 import com.roddyaj.portfoliomanager.schwab.OrdersMonitor;
 import com.roddyaj.portfoliomanager.schwab.PositionsMonitor;
 import com.roddyaj.portfoliomanager.schwab.TransactionsMonitor;
+import com.roddyaj.schwabparse.SchwabOrder;
 import com.roddyaj.schwabparse.SchwabPosition;
 import com.roddyaj.schwabparse.SchwabTransaction;
 
@@ -71,6 +73,8 @@ public final class Main
 
 		Map<String, List<SchwabTransaction>> symbolToTransactions = state.getTransactions().stream()
 			.filter(t -> t.symbol() != null && t.quantity() != null && t.price() != null).collect(Collectors.groupingBy(SchwabTransaction::symbol));
+		Map<String, List<SchwabOrder>> symbolToOrders = state.getOpenOrders().stream().filter(o -> o.symbol() != null)
+			.collect(Collectors.groupingBy(SchwabOrder::symbol));
 
 		for (SchwabPosition schwabPosition : state.getPositions())
 		{
@@ -99,7 +103,19 @@ public final class Main
 					transaction.setPrice(schwabTransaction.price().doubleValue());
 					transaction.setAmount(schwabTransaction.amount().doubleValue());
 
-					position.getTransactions().add(transaction);
+					position.addTransaction(transaction);
+				}
+
+				for (SchwabOrder schwabOrder : symbolToOrders.getOrDefault(schwabPosition.symbol(), List.of()))
+				{
+					Order order = new Order();
+					order.setAction(schwabOrder.action());
+					order.setQuantity(schwabOrder.quantity());
+					order.setOrderType(schwabOrder.orderType());
+					order.setLimitPrice(schwabOrder.limitPrice());
+					order.setTiming(schwabOrder.timing().toString());
+
+					position.addOpenOrder(order);
 				}
 
 				output.getPositions().add(position);
