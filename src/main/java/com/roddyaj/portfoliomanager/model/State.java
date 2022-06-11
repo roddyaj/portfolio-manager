@@ -2,7 +2,7 @@ package com.roddyaj.portfoliomanager.model;
 
 import java.util.List;
 
-import com.roddyaj.schwabparse.SchwabOpenOrder;
+import com.roddyaj.schwabparse.SchwabOrder;
 import com.roddyaj.schwabparse.SchwabPosition;
 import com.roddyaj.schwabparse.SchwabTransaction;
 
@@ -12,7 +12,7 @@ public class State
 
 	private List<SchwabTransaction> transactions;
 
-	private List<SchwabOpenOrder> orders;
+	private List<SchwabOrder> openOrders;
 
 	public List<SchwabPosition> getPositions()
 	{
@@ -34,13 +34,13 @@ public class State
 		this.transactions = transactions;
 	}
 
-	public List<SchwabOpenOrder> getOrders()
+	public List<SchwabOrder> getOpenOrders()
 	{
-		return orders;
+		return openOrders;
 	}
 
-	public void setOrders(List<SchwabOpenOrder> orders)
+	public void setOpenOrders(List<SchwabOrder> orders)
 	{
-		this.orders = orders;
+		this.openOrders = orders;
 	}
 }
