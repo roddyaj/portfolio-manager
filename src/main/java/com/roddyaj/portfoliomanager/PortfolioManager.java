@@ -1,15 +1,11 @@
 package com.roddyaj.portfoliomanager;
 
-import java.io.IOException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import com.roddyaj.portfoliomanager.model.State;
 import com.roddyaj.portfoliomanager.output.Order;
 import com.roddyaj.portfoliomanager.output.Output;
@@ -23,18 +19,9 @@ import com.roddyaj.schwabparse.SchwabOrder;
 import com.roddyaj.schwabparse.SchwabPosition;
 import com.roddyaj.schwabparse.SchwabTransaction;
 
-public final class Main
+public final class PortfolioManager
 {
-	public static void main(String[] args)
-	{
-		Path inputDir = Paths.get(System.getProperty("user.home"), "Downloads");
-		String accountName = "PCRA";
-		String accountNumber = "12345678";
-
-		new Main().run(inputDir, accountName, accountNumber);
-	}
-
-	public void run(Path inputDir, String accountName, String accountNumber)
+	public Output process(Path inputDir, String accountName, String accountNumber)
 	{
 		State state = new State();
 
@@ -43,27 +30,15 @@ public final class Main
 		monitors.add(new TransactionsMonitor(inputDir, accountName, accountNumber, state));
 		monitors.add(new OrdersMonitor(inputDir, accountName, accountNumber, state));
 
-		for (int i = 0; i < 1; i++)
-		{
-			boolean anyUpdated = false;
-			for (AbstractMonitor monitor : monitors)
-				anyUpdated |= monitor.check();
+		boolean anyUpdated = false;
+		for (AbstractMonitor monitor : monitors)
+			anyUpdated |= monitor.check();
 
-			if (anyUpdated)
-			{
-				Output output = createOutput(accountName, state);
-				writeOutput(output);
-			}
+		Output output = null;
+		if (anyUpdated)
+			output = createOutput(accountName, state);
 
-//			try
-//			{
-//				Thread.sleep(5000);
-//			}
-//			catch (InterruptedException e)
-//			{
-//				e.printStackTrace();
-//			}
-		}
+		return output;
 	}
 
 	private Output createOutput(String accountName, State state)
@@ -86,9 +61,9 @@ public final class Main
 				position.setQuantity(schwabPosition.quantity().intValue());
 				position.setPrice(schwabPosition.price().doubleValue());
 				position.setMarketValue(schwabPosition.marketValue());
-				position.setCostBasis(schwabPosition.costBasis().doubleValue());
+				position.setCostBasis(schwabPosition.costBasis() != null ? schwabPosition.costBasis().doubleValue() : 0);
 				position.setDayChangePct(schwabPosition.dayChangePct().doubleValue());
-				position.setGainLossPct(schwabPosition.gainLossPct().doubleValue());
+				position.setGainLossPct(schwabPosition.gainLossPct() != null ? schwabPosition.gainLossPct().doubleValue() : 0);
 				position.setPercentOfAccount(schwabPosition.percentOfAccount());
 				position.setDividendYield(schwabPosition.dividendYield());
 				position.set52WeekLow(schwabPosition._52WeekLow());
@@ -122,23 +97,5 @@ public final class Main
 			}
 		}
 		return output;
-	}
-
-	private void writeOutput(Output output)
-	{
-		try
-		{
-			ObjectMapper mapper = new ObjectMapper();
-			mapper.enable(SerializationFeature.INDENT_OUTPUT);
-			mapper.writeValue(System.out, output);
-
-//			Path outputPath = Paths.get(System.getProperty("user.home"), "Desktop", "output.json");
-//			new ObjectMapper().writeValue(outputPath.toFile(), output);
-//			System.out.println("Wrote to " + outputPath);
-		}
-		catch (IOException e)
-		{
-			e.printStackTrace();
-		}
 	}
 }

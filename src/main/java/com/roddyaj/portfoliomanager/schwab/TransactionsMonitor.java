@@ -15,12 +15,12 @@ public class TransactionsMonitor extends AbstractMonitor
 	@Override
 	protected Path getFile()
 	{
-		final String pattern = "_Transactions_.*\\.CSV";
+		final String pattern = ".*_Transactions_.*\\.csv";
 		Path file = getFile(accountName + pattern,
 			(p1, p2) -> SchwabTransactionsFile.getTime(p2).compareTo(SchwabTransactionsFile.getTime(p1)));
 		if (file == null)
 		{
-			String masked = "XXXX" + accountNumber.substring(4);
+			String masked = "XXXXX" + accountNumber.substring(5);
 			file = getFile(masked + pattern, (p1, p2) -> SchwabTransactionsFile.getTime(p2).compareTo(SchwabTransactionsFile.getTime(p1)));
 		}
 		return file;
