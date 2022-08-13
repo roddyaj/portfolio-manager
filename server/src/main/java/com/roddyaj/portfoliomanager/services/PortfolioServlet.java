@@ -1,19 +1,17 @@
-package com.roddyaj.portfoliomanager.server;
+package com.roddyaj.portfoliomanager.services;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.roddyaj.portfoliomanager.PortfolioManager;
+import com.roddyaj.portfoliomanager.logic.PortfolioManager;
 import com.roddyaj.portfoliomanager.output.Output;
 
 import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-public class PortfolioServlet extends HttpServlet
+public class PortfolioServlet extends EnhancedServlet
 {
 	private static final long serialVersionUID = -2948464420724282868L;
 
@@ -26,11 +24,6 @@ public class PortfolioServlet extends HttpServlet
 
 		Output output = new PortfolioManager().process(inputDir, accountName, accountNumber);
 
-		ObjectMapper mapper = new ObjectMapper();
-//		mapper.enable(SerializationFeature.INDENT_OUTPUT);
-
-		response.setContentType("application/json");
-		response.setStatus(HttpServletResponse.SC_OK);
-		mapper.writeValue(response.getOutputStream(), output);
+		writeJson(output, response);
 	}
 }

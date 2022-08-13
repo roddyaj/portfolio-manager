@@ -1,38 +1,120 @@
-.App {
-  text-align: center;
+:root {
+	--text-color: #000;
+	--bg-color: #EEE;
+	--block-bg-color: #FFF;
+	--line-color: #AAA;
+	--border: 1px solid var(--line-color);
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+body {
+	background-color: var(--bg-color);
+	color: var(--text-color);
+	font: 14px Arial, sans-serif;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+table {
+	margin: -2px;
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+th {
+	font-weight: normal;
+	background-color: #CCC;
 }
 
-.App-link {
-  color: #61dafb;
+th, td {
+	padding: 2px 2px 2px 2px;
+	text-align: right;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+th.f, td.f {
+	padding: 2px 2px 2px 2px;
+}
+
+a {
+	color: #00F;
+}
+
+a:link {
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+img {
+	display: block;
+}
+
+.main-header-item {
+	flex: 1 1 0;
+	padding: 0px 2px;
+}
+
+.row {
+	display: flex;
+	flex-direction: row;
+}
+
+.column {
+	display: flex;
+	flex-direction: column;
+	margin-right: 8px;
+}
+
+.block {
+	background-color: var(--block-bg-color);
+	padding: 4px;
+	border-radius: 4px;
+	box-shadow: 0 0 .25rem #AAAA;
+	margin-bottom: 8px;
+}
+
+.heading {
+	display: flex;
+	align-items: center;
+	padding-bottom: 4px;
+	border-bottom: var(--border);
+	margin-bottom: 4px;
+}
+
+.title {
+	font-size: 16px;
+	font-weight: bold;
+}
+
+.popup {
+	position: relative;
+	display: inline-block;
+	cursor: pointer;
+}
+
+.popup .popup-content {
+	background-color: var(--block-bg-color);
+	padding: 4px;
+	border: var(--border);
+	border-radius: 4px;
+	box-shadow: 0 0 .25rem #AAAA;
+	visibility: hidden;
+	white-space: nowrap;
+	position: absolute;
+	left: 56px;
+	top: -36px;
+	z-index: 1;
+}
+
+.popup .show {
+	visibility: visible;
+}
+
+.l {
+	text-align: left;
+}
+
+.r {
+	text-align: right;
+}
+
+.c {
+	text-align: center;
 }

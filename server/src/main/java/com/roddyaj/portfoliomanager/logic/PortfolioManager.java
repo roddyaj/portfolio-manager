@@ -1,4 +1,4 @@
-package com.roddyaj.portfoliomanager;
+package com.roddyaj.portfoliomanager.logic;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
