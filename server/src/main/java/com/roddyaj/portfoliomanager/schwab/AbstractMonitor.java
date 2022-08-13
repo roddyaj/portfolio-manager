@@ -8,7 +8,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Stream;
 
-import com.roddyaj.portfoliomanager.model.State;
+import com.roddyaj.portfoliomanager.model.PortfolioState;
 
 public abstract class AbstractMonitor
 {
@@ -18,13 +18,13 @@ public abstract class AbstractMonitor
 
 	protected final String accountNumber;
 
-	private final State state;
+	private final PortfolioState state;
 
 	private FileTime dirLastModified;
 
 	private Path file;
 
-	public AbstractMonitor(Path dir, String accountName, String accountNumber, State state)
+	public AbstractMonitor(Path dir, String accountName, String accountNumber, PortfolioState state)
 	{
 		this.dir = dir;
 		this.accountName = accountName;
@@ -60,7 +60,7 @@ public abstract class AbstractMonitor
 
 	protected abstract Path getFile();
 
-	protected abstract void updateState(Path file, State state);
+	protected abstract void updateState(Path file, PortfolioState state);
 
 	protected Path getFile(String pattern, Comparator<? super Path> comparator)
 	{

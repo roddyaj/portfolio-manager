@@ -22,7 +22,7 @@ function App() {
 
   useEffect(() => {
     const requestPortfolio = async () => {
-      const response = await fetch(`http://localhost:8090/portfolio?accountName=${selectedAccount}&accountNumber=`);
+      const response = await fetch(`http://localhost:8090/portfolio?accountName=${selectedAccount}`);
       const accounts = await response.json();
       return accounts;
     };

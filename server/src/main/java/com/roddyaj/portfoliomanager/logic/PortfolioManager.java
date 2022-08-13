@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import com.roddyaj.portfoliomanager.model.State;
+import com.roddyaj.portfoliomanager.model.PortfolioState;
 import com.roddyaj.portfoliomanager.output.Order;
 import com.roddyaj.portfoliomanager.output.Output;
 import com.roddyaj.portfoliomanager.output.Position;
@@ -23,7 +23,7 @@ public final class PortfolioManager
 {
 	public Output process(Path inputDir, String accountName, String accountNumber)
 	{
-		State state = new State();
+		PortfolioState state = new PortfolioState();
 
 		List<AbstractMonitor> monitors = new ArrayList<>();
 		monitors.add(new PositionsMonitor(inputDir, accountName, accountNumber, state));
@@ -41,7 +41,7 @@ public final class PortfolioManager
 		return output;
 	}
 
-	private Output createOutput(String accountName, State state)
+	private Output createOutput(String accountName, PortfolioState state)
 	{
 		Output output = new Output();
 		output.setAccountName(accountName);

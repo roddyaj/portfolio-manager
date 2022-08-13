@@ -1,11 +1,12 @@
 package com.roddyaj.portfoliomanager.services;
 
 import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.util.stream.Stream;
 
 import com.roddyaj.portfoliomanager.logic.PortfolioManager;
+import com.roddyaj.portfoliomanager.model.State;
 import com.roddyaj.portfoliomanager.output.Output;
+import com.roddyaj.portfoliomanager.settings.AccountSettings;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -18,11 +19,13 @@ public class PortfolioServlet extends EnhancedServlet
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
-		String accountName = request.getParameter("accountName");
-		String accountNumber = request.getParameter("accountNumber");
-		Path inputDir = Paths.get(System.getProperty("user.home"), "Downloads");
+		State state = State.getInstance();
 
-		Output output = new PortfolioManager().process(inputDir, accountName, accountNumber);
+		String accountName = request.getParameter("accountName");
+		String accountNumber = Stream.of(state.getSettings().getAccounts()).filter(a -> a.getName().equals(accountName))
+			.map(AccountSettings::getAccountNumber).findAny().orElse(null);
+
+		Output output = new PortfolioManager().process(state.getInputDir(), accountName, accountNumber);
 
 		writeJson(output, response);
 	}

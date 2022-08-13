@@ -1,46 +1,38 @@
 package com.roddyaj.portfoliomanager.model;
 
-import java.util.List;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.concurrent.atomic.AtomicReference;
 
-import com.roddyaj.schwabparse.SchwabOrder;
-import com.roddyaj.schwabparse.SchwabPosition;
-import com.roddyaj.schwabparse.SchwabTransaction;
+import com.roddyaj.portfoliomanager.settings.Settings;
 
-public class State
+public final class State
 {
-	private List<SchwabPosition> positions;
+	private static final State INSTANCE = new State();
 
-	private List<SchwabTransaction> transactions;
-
-	private List<SchwabOrder> openOrders;
-
-	public List<SchwabPosition> getPositions()
+	public static State getInstance()
 	{
-		return positions;
+		return INSTANCE;
 	}
 
-	public void setPositions(List<SchwabPosition> positions)
+	private final AtomicReference<Settings> settings = new AtomicReference<>();
+
+	public Path getInputDir()
 	{
-		this.positions = positions;
+		return Paths.get(System.getProperty("user.home"), "Downloads");
 	}
 
-	public List<SchwabTransaction> getTransactions()
+	public Settings getSettings()
 	{
-		return transactions;
+		return settings.get();
 	}
 
-	public void setTransactions(List<SchwabTransaction> transactions)
+	public void setSettings(Settings settings)
 	{
-		this.transactions = transactions;
+		this.settings.set(settings);
 	}
 
-	public List<SchwabOrder> getOpenOrders()
+	private State()
 	{
-		return openOrders;
-	}
-
-	public void setOpenOrders(List<SchwabOrder> orders)
-	{
-		this.openOrders = orders;
 	}
 }
