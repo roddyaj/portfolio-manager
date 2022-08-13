@@ -66,6 +66,7 @@ public final class PortfolioManager
 				position.setGainLossPct(schwabPosition.gainLossPct() != null ? schwabPosition.gainLossPct().doubleValue() : 0);
 				position.setPercentOfAccount(schwabPosition.percentOfAccount());
 				position.setDividendYield(schwabPosition.dividendYield());
+				position.setPeRatio(schwabPosition.peRatio());
 				position.set52WeekLow(schwabPosition._52WeekLow());
 				position.set52WeekHigh(schwabPosition._52WeekHigh());
 

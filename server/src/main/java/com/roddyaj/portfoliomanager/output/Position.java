@@ -27,7 +27,7 @@ public class Position
 	Double dividendYield;
 //	Double lastDividend;
 //	LocalDate exDividendDate;
-//	Double peRatio;
+	Double peRatio;
 	Double _52WeekLow;
 	Double _52WeekHigh;
 //	Integer volume;
@@ -136,6 +136,16 @@ public class Position
 	public void setDividendYield(Double dividendYield)
 	{
 		this.dividendYield = dividendYield;
+	}
+
+	public Double getPeRatio()
+	{
+		return peRatio;
+	}
+
+	public void setPeRatio(Double peRatio)
+	{
+		this.peRatio = peRatio;
 	}
 
 	public Double get52WeekLow()

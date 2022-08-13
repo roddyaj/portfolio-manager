@@ -7,6 +7,7 @@
 }
 
 body {
+	margin: 8px;
 	background-color: var(--bg-color);
 	color: var(--text-color);
 	font: 14px Arial, sans-serif;
@@ -14,6 +15,7 @@ body {
 
 table {
 	margin: -2px;
+	border-collapse: separate;
 }
 
 th {
@@ -46,23 +48,23 @@ img {
 	display: block;
 }
 
-.main-header-item {
+.pm-main-header-item {
 	flex: 1 1 0;
 	padding: 0px 2px;
 }
 
-.row {
+.pm-row {
 	display: flex;
 	flex-direction: row;
 }
 
-.column {
+.pm-column {
 	display: flex;
 	flex-direction: column;
 	margin-right: 8px;
 }
 
-.block {
+.pm-block {
 	background-color: var(--block-bg-color);
 	padding: 4px;
 	border-radius: 4px;
@@ -70,7 +72,7 @@ img {
 	margin-bottom: 8px;
 }
 
-.heading {
+.pm-heading {
 	display: flex;
 	align-items: center;
 	padding-bottom: 4px;
@@ -78,33 +80,9 @@ img {
 	margin-bottom: 4px;
 }
 
-.title {
+.pm-title {
 	font-size: 16px;
 	font-weight: bold;
-}
-
-.popup {
-	position: relative;
-	display: inline-block;
-	cursor: pointer;
-}
-
-.popup .popup-content {
-	background-color: var(--block-bg-color);
-	padding: 4px;
-	border: var(--border);
-	border-radius: 4px;
-	box-shadow: 0 0 .25rem #AAAA;
-	visibility: hidden;
-	white-space: nowrap;
-	position: absolute;
-	left: 56px;
-	top: -36px;
-	z-index: 1;
-}
-
-.popup .show {
-	visibility: visible;
 }
 
 .l {
