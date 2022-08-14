@@ -23,17 +23,19 @@ public class Position
 	private double gainLossPct;
 //	boolean reinvestDividends;
 //	boolean capitalGains;
-	Double percentOfAccount;
-	Double dividendYield;
+	private Double percentOfAccount;
+	private Double dividendYield;
 //	Double lastDividend;
 //	LocalDate exDividendDate;
-	Double peRatio;
-	Double _52WeekLow;
-	Double _52WeekHigh;
+	private Double peRatio;
+	private Double _52WeekLow;
+	private Double _52WeekHigh;
 //	Integer volume;
 //	Double intrinsicValue;
 //	String inTheMoney;
 //	String securityType;
+
+	private Double targetPct;
 
 	private List<Transaction> transactions;
 	private List<Order> openOrders;
@@ -166,6 +168,16 @@ public class Position
 	public void set52WeekHigh(Double _52WeekHigh)
 	{
 		this._52WeekHigh = _52WeekHigh;
+	}
+
+	public Double getTargetPct()
+	{
+		return targetPct;
+	}
+
+	public void setTargetPct(Double targetPct)
+	{
+		this.targetPct = targetPct;
 	}
 
 	public List<Transaction> getTransactions()

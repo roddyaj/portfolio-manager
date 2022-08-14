@@ -24,8 +24,9 @@ public class PortfolioServlet extends EnhancedServlet
 		String accountName = request.getParameter("accountName");
 		String accountNumber = Stream.of(state.getSettings().getAccounts()).filter(a -> a.getName().equals(accountName))
 			.map(AccountSettings::getAccountNumber).findAny().orElse(null);
+		AccountSettings accountSettings = state.getSettings().getAccount(accountName);
 
-		Output output = new PortfolioManager().process(state.getInputDir(), accountName, accountNumber);
+		Output output = new PortfolioManager().process(state.getInputDir(), accountName, accountNumber, accountSettings);
 
 		writeJson(output, response);
 	}

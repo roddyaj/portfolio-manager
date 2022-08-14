@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.roddyaj.portfoliomanager.model.Message;
 import com.roddyaj.portfoliomanager.model.PortfolioState;
 import com.roddyaj.portfoliomanager.output.Order;
 import com.roddyaj.portfoliomanager.output.Output;
@@ -15,13 +16,14 @@ import com.roddyaj.portfoliomanager.schwab.AbstractMonitor;
 import com.roddyaj.portfoliomanager.schwab.OrdersMonitor;
 import com.roddyaj.portfoliomanager.schwab.PositionsMonitor;
 import com.roddyaj.portfoliomanager.schwab.TransactionsMonitor;
+import com.roddyaj.portfoliomanager.settings.AccountSettings;
 import com.roddyaj.schwabparse.SchwabOrder;
 import com.roddyaj.schwabparse.SchwabPosition;
 import com.roddyaj.schwabparse.SchwabTransaction;
 
 public final class PortfolioManager
 {
-	public Output process(Path inputDir, String accountName, String accountNumber)
+	public Output process(Path inputDir, String accountName, String accountNumber, AccountSettings accountSettings)
 	{
 		PortfolioState state = new PortfolioState();
 
@@ -36,12 +38,12 @@ public final class PortfolioManager
 
 		Output output = null;
 		if (anyUpdated)
-			output = createOutput(accountName, state);
+			output = createOutput(accountName, accountSettings, state);
 
 		return output;
 	}
 
-	private Output createOutput(String accountName, PortfolioState state)
+	private Output createOutput(String accountName, AccountSettings accountSettings, PortfolioState state)
 	{
 		Output output = new Output();
 		output.setAccountName(accountName);
@@ -50,6 +52,8 @@ public final class PortfolioManager
 			.filter(t -> t.symbol() != null && t.quantity() != null && t.price() != null).collect(Collectors.groupingBy(SchwabTransaction::symbol));
 		Map<String, List<SchwabOrder>> symbolToOrders = state.getOpenOrders().stream().filter(o -> o.symbol() != null)
 			.collect(Collectors.groupingBy(SchwabOrder::symbol));
+		List<Message> messages = new ArrayList<>();
+		AllocationMap allocationMap = new AllocationMap(accountSettings.getAllocations(), messages);
 
 		for (SchwabPosition schwabPosition : state.getPositions())
 		{
@@ -69,6 +73,8 @@ public final class PortfolioManager
 				position.setPeRatio(schwabPosition.peRatio());
 				position.set52WeekLow(schwabPosition._52WeekLow());
 				position.set52WeekHigh(schwabPosition._52WeekHigh());
+				Double target = allocationMap.getAllocation(schwabPosition.symbol());
+				position.setTargetPct(target != null ? (target.doubleValue() * 100) : null);
 
 				for (SchwabTransaction schwabTransaction : symbolToTransactions.getOrDefault(schwabPosition.symbol(), List.of()))
 				{
