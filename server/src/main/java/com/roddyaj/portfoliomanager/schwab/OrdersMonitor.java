@@ -3,7 +3,7 @@ package com.roddyaj.portfoliomanager.schwab;
 import java.nio.file.Path;
 
 import com.roddyaj.portfoliomanager.model.PortfolioState;
-import com.roddyaj.schwabparse.SchwabOrdersFile;
+import com.roddyaj.schwabparse.SchwabOrdersReader;
 
 public class OrdersMonitor extends AbstractMonitor
 {
@@ -15,12 +15,12 @@ public class OrdersMonitor extends AbstractMonitor
 	@Override
 	protected Path getFile()
 	{
-		return getFile(accountNumber + " Order Details.*\\.CSV", (p1, p2) -> SchwabOrdersFile.getTime(p2).compareTo(SchwabOrdersFile.getTime(p1)));
+		return getFile(accountNumber + " Order Details.*\\.CSV", (p1, p2) -> SchwabOrdersReader.getTime(p2).compareTo(SchwabOrdersReader.getTime(p1)));
 	}
 
 	@Override
 	protected void updateState(Path file, PortfolioState state)
 	{
-		state.setOpenOrders(new SchwabOrdersFile(file).getOpenOrders());
+		state.setOrders(new SchwabOrdersReader().read(file));
 	}
 }

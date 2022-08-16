@@ -1,46 +1,44 @@
 package com.roddyaj.portfoliomanager.model;
 
-import java.util.List;
-
-import com.roddyaj.schwabparse.SchwabOrder;
-import com.roddyaj.schwabparse.SchwabPosition;
-import com.roddyaj.schwabparse.SchwabTransaction;
+import com.roddyaj.schwabparse.SchwabOrdersData;
+import com.roddyaj.schwabparse.SchwabPositionsData;
+import com.roddyaj.schwabparse.SchwabTransactionsData;
 
 public class PortfolioState
 {
-	private List<SchwabPosition> positions;
+	private SchwabPositionsData positions;
 
-	private List<SchwabTransaction> transactions;
+	private SchwabTransactionsData transactions;
 
-	private List<SchwabOrder> openOrders;
+	private SchwabOrdersData orders;
 
-	public List<SchwabPosition> getPositions()
+	public SchwabPositionsData getPositions()
 	{
 		return positions;
 	}
 
-	public void setPositions(List<SchwabPosition> positions)
+	public void setPositions(SchwabPositionsData positions)
 	{
 		this.positions = positions;
 	}
 
-	public List<SchwabTransaction> getTransactions()
+	public SchwabTransactionsData getTransactions()
 	{
 		return transactions;
 	}
 
-	public void setTransactions(List<SchwabTransaction> transactions)
+	public void setTransactions(SchwabTransactionsData transactions)
 	{
 		this.transactions = transactions;
 	}
 
-	public List<SchwabOrder> getOpenOrders()
+	public SchwabOrdersData getOrders()
 	{
-		return openOrders;
+		return orders;
 	}
 
-	public void setOpenOrders(List<SchwabOrder> orders)
+	public void setOrders(SchwabOrdersData orders)
 	{
-		this.openOrders = orders;
+		this.orders = orders;
 	}
 }

@@ -48,14 +48,14 @@ public final class PortfolioManager
 		Output output = new Output();
 		output.setAccountName(accountName);
 
-		Map<String, List<SchwabTransaction>> symbolToTransactions = state.getTransactions().stream()
+		Map<String, List<SchwabTransaction>> symbolToTransactions = state.getTransactions().transactions().stream()
 			.filter(t -> t.symbol() != null && t.quantity() != null && t.price() != null).collect(Collectors.groupingBy(SchwabTransaction::symbol));
-		Map<String, List<SchwabOrder>> symbolToOrders = state.getOpenOrders().stream().filter(o -> o.symbol() != null)
+		Map<String, List<SchwabOrder>> symbolToOrders = state.getOrders().getOpenOrders().stream().filter(o -> o.symbol() != null)
 			.collect(Collectors.groupingBy(SchwabOrder::symbol));
 		List<Message> messages = new ArrayList<>();
 		AllocationMap allocationMap = new AllocationMap(accountSettings.getAllocations(), messages);
 
-		for (SchwabPosition schwabPosition : state.getPositions())
+		for (SchwabPosition schwabPosition : state.getPositions().positions())
 		{
 			if (schwabPosition.quantity() != null)
 			{
@@ -75,6 +75,7 @@ public final class PortfolioManager
 				position.set52WeekHigh(schwabPosition._52WeekHigh());
 				Double target = allocationMap.getAllocation(schwabPosition.symbol());
 				position.setTargetPct(target != null ? (target.doubleValue() * 100) : null);
+//				position.setSharesToBuy(calculateSharesToBuy(position, accountSettings, target));
 
 				for (SchwabTransaction schwabTransaction : symbolToTransactions.getOrDefault(schwabPosition.symbol(), List.of()))
 				{
@@ -104,5 +105,19 @@ public final class PortfolioManager
 			}
 		}
 		return output;
+	}
+
+	private Integer calculateSharesToBuy(Position position, AccountSettings accountSettings, Double target)
+	{
+//		if (target != null)
+//		{
+//			double targetValue = account.getTotalValue() * target.doubleValue();
+//			double delta = targetValue - position.getMarketValue();
+//			int quantity = round(delta / position.getPrice(), .75);
+//			boolean isBuy = quantity > 0;
+//			boolean doOrder = quantity != 0 && Math.abs(delta / targetValue) > (isBuy ? 0.005 : 0.04)
+//				&& Math.abs(quantity * position.getPrice()) >= accountSettings.getMinOrder();
+//		}
+		return 0;
 	}
 }

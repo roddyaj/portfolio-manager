@@ -29,6 +29,7 @@ function Positions(props) {
 						<th>Actual</th>
 						<th>Target</th>
 						<th>Ratio</th>
+						<th>Action</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -55,6 +56,7 @@ function renderRow(position, i) {
 			<td>{position.percentOfAccount.toFixed(2) + "%"}</td>
 			<td>{position.targetPct ? position.targetPct.toFixed(2) + "%" : ""}</td>
 			<td>{position.targetPct ? (100 * position.percentOfAccount / position.targetPct).toFixed(1) + "%" : ""}</td>
+			<td>{position.sharesToBuy ? `${position.sharesToBuy > 0 ? "Buy" : "Sell"} ${Math.abs(position.sharesToBuy)}` : ""}</td>
 		</tr>
 	);
 }

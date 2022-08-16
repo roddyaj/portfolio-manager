@@ -36,6 +36,7 @@ public class Position
 //	String securityType;
 
 	private Double targetPct;
+	private Integer sharesToBuy;
 
 	private List<Transaction> transactions;
 	private List<Order> openOrders;
@@ -178,6 +179,16 @@ public class Position
 	public void setTargetPct(Double targetPct)
 	{
 		this.targetPct = targetPct;
+	}
+
+	public Integer getSharesToBuy()
+	{
+		return sharesToBuy;
+	}
+
+	public void setSharesToBuy(Integer sharesToBuy)
+	{
+		this.sharesToBuy = sharesToBuy;
 	}
 
 	public List<Transaction> getTransactions()

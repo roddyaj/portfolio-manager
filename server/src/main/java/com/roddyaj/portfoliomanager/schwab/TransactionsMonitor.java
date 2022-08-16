@@ -3,7 +3,7 @@ package com.roddyaj.portfoliomanager.schwab;
 import java.nio.file.Path;
 
 import com.roddyaj.portfoliomanager.model.PortfolioState;
-import com.roddyaj.schwabparse.SchwabTransactionsFile;
+import com.roddyaj.schwabparse.SchwabTransactionsReader;
 
 public class TransactionsMonitor extends AbstractMonitor
 {
@@ -16,12 +16,11 @@ public class TransactionsMonitor extends AbstractMonitor
 	protected Path getFile()
 	{
 		final String pattern = ".*_Transactions_.*\\.csv";
-		Path file = getFile(accountName + pattern,
-			(p1, p2) -> SchwabTransactionsFile.getTime(p2).compareTo(SchwabTransactionsFile.getTime(p1)));
+		Path file = getFile(accountName + pattern, (p1, p2) -> SchwabTransactionsReader.getTime(p2).compareTo(SchwabTransactionsReader.getTime(p1)));
 		if (file == null)
 		{
 			String masked = "XXXXX" + accountNumber.substring(5);
-			file = getFile(masked + pattern, (p1, p2) -> SchwabTransactionsFile.getTime(p2).compareTo(SchwabTransactionsFile.getTime(p1)));
+			file = getFile(masked + pattern, (p1, p2) -> SchwabTransactionsReader.getTime(p2).compareTo(SchwabTransactionsReader.getTime(p1)));
 		}
 		return file;
 	}
@@ -29,6 +28,6 @@ public class TransactionsMonitor extends AbstractMonitor
 	@Override
 	protected void updateState(Path file, PortfolioState state)
 	{
-		state.setTransactions(new SchwabTransactionsFile(file).getTransactions());
+		state.setTransactions(new SchwabTransactionsReader().read(file));
 	}
 }
