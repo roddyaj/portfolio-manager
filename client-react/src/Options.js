@@ -22,7 +22,7 @@ function Options(props) {
 			<table>
 				<thead>
 					<tr>
-						<th className="l f">Ticker</th>
+						<th className="l">Ticker</th>
 						<th>#</th>
 						<th className="c">T</th>
 						<th className="c">Expiry</th>
@@ -41,7 +41,7 @@ function renderRow(position) {
 	const [symbol, expiry, strike, type] = position.symbol.split(" ");
 	return (
 		<tr key={position.symbol}>
-			<td className="l f">
+			<td className="l">
 				<a href={`https://finance.yahoo.com/quote/${symbol}`} target="_blank">{symbol}</a>
 			</td>
 			<td>{Math.abs(position.quantity)}</td>

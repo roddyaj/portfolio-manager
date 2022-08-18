@@ -15,7 +15,11 @@ body {
 
 table {
 	margin: -2px;
-	border-collapse: separate;
+	/* border-collapse: separate; */
+}
+
+tr:nth-child(even) {
+	background-color: #F2F2F2;
 }
 
 th {
@@ -24,12 +28,8 @@ th {
 }
 
 th, td {
-	padding: 2px 2px 2px 2px;
+	padding: 3px;
 	text-align: right;
-}
-
-th.f, td.f {
-	padding: 2px 2px 2px 2px;
 }
 
 a {

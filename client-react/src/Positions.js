@@ -2,25 +2,25 @@ import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
 import Popover from 'react-bootstrap/Popover';
 
 function Positions(props) {
-	const { portfolio } = props;
+	const { portfolio, showAllPositions } = props;
 
-	const sharePositions = portfolio.positions
-		.filter(p => !p.symbol.includes(" "))
+	const viewPositions = portfolio.positions
+		.filter(p => !p.symbol.includes(" ") && (showAllPositions || p.sharesToBuy))
 		.sort((a, b) => b.marketValue - a.marketValue);
 
-	if (sharePositions.length === 0) {
+	if (viewPositions.length === 0) {
 		return null;
 	}
 
 	return (
 		<div className="pm-block">
 			<div className="pm-heading">
-				<div className="pm-title">Positions ({sharePositions.length})</div>
+				<div className="pm-title">Positions ({viewPositions.length})</div>
 			</div>
 			<table>
 				<thead>
 					<tr>
-						<th className="l f">Ticker</th>
+						<th className="l">Ticker</th>
 						<th>#</th>
 						<th>Price</th>
 						<th>Value</th>
@@ -34,7 +34,7 @@ function Positions(props) {
 					</tr>
 				</thead>
 				<tbody>
-					{sharePositions.map(renderRow)}
+					{viewPositions.map(renderRow)}
 				</tbody>
 			</table>
 		</div>
@@ -60,10 +60,8 @@ function renderRow(position, i) {
 
 	return (
 		<tr key={position.symbol}>
-			<td className="l f">
-				<OverlayTrigger trigger={['hover', 'focus']} placement="right" overlay={renderPositionPopover(position, i)}>
-					<a href={`https://finance.yahoo.com/quote/${position.symbol}`} target="_blank" style={position.peRatio < 0 ? { backgroundColor: "#FDD" } : {}}>{position.symbol}</a>
-				</OverlayTrigger>
+			<td className="l">
+				<a href={`https://finance.yahoo.com/quote/${position.symbol}`} target="_blank" style={position.peRatio < 0 ? { backgroundColor: "#FDD" } : {}}>{position.symbol}</a>
 			</td>
 			<td>{position.quantity}</td>
 			<td>{position.price.toFixed(2)}</td>
@@ -73,7 +71,7 @@ function renderRow(position, i) {
 			<td>{position.percentOfAccount.toFixed(2) + "%"}</td>
 			<td>{position.targetPct ? position.targetPct.toFixed(2) + "%" : ""}</td>
 			<td>{position.targetPct ? (100 * position.percentOfAccount / position.targetPct).toFixed(1) + "%" : ""}</td>
-			<td className="l">{position.sharesToBuy ? (<a href={actionUrl} target="_blank">{actionText}</a>) : ""}</td>
+			<td className="l">{position.sharesToBuy ? (<a href={actionUrl} target="_blank" onClick={() => copyClip(Math.abs(position.sharesToBuy))}>{actionText}</a>) : ""}</td>
 			<td className="l">
 				{(openBuyCount || openSellCount) ? (
 					<OverlayTrigger trigger={['hover', 'focus']} placement="right" overlay={renderOpenOrdersPopover(position, i)}>
@@ -143,6 +141,10 @@ function renderOpenOrdersPopover(position, i) {
 			</Popover.Body>
 		</Popover>
 	);
+}
+
+function copyClip(text) {
+	navigator.clipboard.writeText(text);
 }
 
 export default Positions;
