@@ -75,9 +75,7 @@ img {
 .pm-heading {
 	display: flex;
 	align-items: center;
-	padding-bottom: 4px;
-	border-bottom: var(--border);
-	margin-bottom: 4px;
+	margin-bottom: 8px;
 }
 
 .pm-title {
