@@ -47,6 +47,8 @@ public final class PortfolioManager
 	{
 		Output output = new Output();
 		output.setAccountName(accountName);
+		output.setBalance(state.getPositions().balance());
+		output.setCash(state.getPositions().cash());
 
 		Map<String, List<SchwabTransaction>> symbolToTransactions = state.getTransactions().transactions().stream()
 			.filter(t -> t.symbol() != null && t.quantity() != null && t.price() != null).collect(Collectors.groupingBy(SchwabTransaction::symbol));

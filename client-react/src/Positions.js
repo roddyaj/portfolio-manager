@@ -1,8 +1,11 @@
+import { useState } from "react";
 import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
 import Popover from 'react-bootstrap/Popover';
 
 function Positions(props) {
-	const { portfolio, showAllPositions } = props;
+	const { portfolio } = props;
+
+	const [showAllPositions, setShowAllPositions] = useState(true);
 
 	const viewPositions = portfolio.positions
 		.filter(p => !p.symbol.includes(" ") && (showAllPositions || p.sharesToBuy))
@@ -16,6 +19,13 @@ function Positions(props) {
 		<div className="pm-block">
 			<div className="pm-heading">
 				<div className="pm-title">Positions ({viewPositions.length})</div>
+
+				<div style={{ marginLeft: 12 }}>
+					<input type="radio" name="positionVisibility" id="visibility-all" value="all" checked={showAllPositions} onChange={() => setShowAllPositions(true)} />
+					<label htmlFor="visibility-all" style={{ padding: 2, marginRight: 4 }}>All</label>
+					<input type="radio" name="positionVisibility" id="visibility-actions" value="actions" checked={!showAllPositions} onChange={() => setShowAllPositions(false)} />
+					<label htmlFor="visibility-actions" style={{ padding: 2, marginRight: 4 }}>Actions</label>
+				</div>
 			</div>
 			<table>
 				<thead>
@@ -47,7 +57,7 @@ function renderRow(position, i, showAllPositions) {
 	const actionUrl = `https://client.schwab.com/Areas/Trade/Allinone/index.aspx?tradeaction=${action}&Symbol=${position.symbol}`;
 	const openBuyCount = position.openOrders ? position.openOrders.filter(o => o.action === "Buy").map(o => o.quantity).reduce((tot, cur) => tot + cur, 0) : 0;
 	const openSellCount = position.openOrders ? position.openOrders.filter(o => o.action === "Sell").map(o => o.quantity).reduce((tot, cur) => tot + cur, 0) : 0;
-	const openOrderArray = [['B', openBuyCount], ['S', openSellCount]].filter(a => a[1] != 0);
+	const openOrderArray = [['B', openBuyCount], ['S', openSellCount]].filter(a => a[1] !== 0);
 	const openOrderText = showAllPositions
 		? openOrderArray.map(a => a.join(" ")).join(", ")
 		: openOrderArray.filter(a => a[0] === action.charAt(0)).map(a => a[1]).join("");

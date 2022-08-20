@@ -9,7 +9,6 @@ function App() {
 	const [accounts, setAccounts] = useState([]);
 	const [selectedAccount, setSelectedAccount] = useState(null);
 	const [portfolio, setPortfolio] = useState(null);
-	const [showAllPositions, setShowAllPositions] = useState(true);
 
 	useEffect(() => {
 		const requestAccounts = async () => {
@@ -39,14 +38,13 @@ function App() {
 			<TitleBar
 				accounts={accounts}
 				setSelectedAccount={setSelectedAccount}
-				showAllPositions={showAllPositions}
-				setShowAllPositions={setShowAllPositions}
+				portfolio={portfolio}
 			/>
 			{
 				portfolio ? (
 					<div className="pm-row">
 						<div className="pm-column">
-							<Positions portfolio={portfolio} showAllPositions={showAllPositions} />
+							<Positions portfolio={portfolio} />
 						</div>
 						<div className="pm-column">
 							<Options portfolio={portfolio} isLong={false} />

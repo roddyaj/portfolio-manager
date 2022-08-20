@@ -7,6 +7,10 @@ public class Output
 {
 	private String accountName;
 
+	private double balance;
+
+	private double cash;
+
 	private List<Position> positions;
 
 	public String getAccountName()
@@ -17,6 +21,26 @@ public class Output
 	public void setAccountName(String accountName)
 	{
 		this.accountName = accountName;
+	}
+
+	public double getBalance()
+	{
+		return balance;
+	}
+
+	public void setBalance(double balance)
+	{
+		this.balance = balance;
+	}
+
+	public double getCash()
+	{
+		return cash;
+	}
+
+	public void setCash(double cash)
+	{
+		this.cash = cash;
 	}
 
 	public List<Position> getPositions()
