@@ -18,8 +18,11 @@ import com.roddyaj.portfoliomanager.schwab.PositionsMonitor;
 import com.roddyaj.portfoliomanager.schwab.TransactionsMonitor;
 import com.roddyaj.portfoliomanager.settings.AccountSettings;
 import com.roddyaj.schwabparse.SchwabOrder;
+import com.roddyaj.schwabparse.SchwabOrdersData;
 import com.roddyaj.schwabparse.SchwabPosition;
+import com.roddyaj.schwabparse.SchwabPositionsData;
 import com.roddyaj.schwabparse.SchwabTransaction;
+import com.roddyaj.schwabparse.SchwabTransactionsData;
 
 public final class PortfolioManager
 {
@@ -47,62 +50,74 @@ public final class PortfolioManager
 	{
 		Output output = new Output();
 		output.setAccountName(accountName);
-		output.setBalance(state.getPositions().balance());
-		output.setCash(state.getPositions().cash());
 
-		Map<String, List<SchwabTransaction>> symbolToTransactions = state.getTransactions().transactions().stream()
-			.filter(t -> t.symbol() != null && t.quantity() != null && t.price() != null).collect(Collectors.groupingBy(SchwabTransaction::symbol));
-		Map<String, List<SchwabOrder>> symbolToOrders = state.getOrders().getOpenOrders().stream().filter(o -> o.symbol() != null)
-			.collect(Collectors.groupingBy(SchwabOrder::symbol));
+		SchwabTransactionsData transactions = state.getTransactions();
+		Map<String, List<SchwabTransaction>> symbolToTransactions = transactions != null ? transactions.transactions().stream()
+			.filter(t -> t.symbol() != null && t.quantity() != null && t.price() != null).collect(Collectors.groupingBy(SchwabTransaction::symbol))
+			: Map.of();
+
+		SchwabOrdersData orders = state.getOrders();
+		Map<String, List<SchwabOrder>> symbolToOrders = orders != null
+			? orders.getOpenOrders().stream().filter(o -> o.symbol() != null).collect(Collectors.groupingBy(SchwabOrder::symbol))
+			: Map.of();
+
 		List<Message> messages = new ArrayList<>();
 		AllocationMap allocationMap = new AllocationMap(accountSettings.getAllocations(), messages);
 
-		for (SchwabPosition schwabPosition : state.getPositions().positions())
+		SchwabPositionsData positions = state.getPositions();
+		if (positions != null)
 		{
-			Position position = new Position();
-			position.setSymbol(schwabPosition.symbol());
-			position.setDescription(schwabPosition.description());
-			position.setQuantity(schwabPosition.quantity().intValue());
-			position.setPrice(schwabPosition.price().doubleValue());
-			position.setMarketValue(schwabPosition.marketValue());
-			position.setCostBasis(schwabPosition.costBasis() != null ? schwabPosition.costBasis().doubleValue() : 0);
-			position.setDayChangePct(schwabPosition.dayChangePct() != null ? schwabPosition.dayChangePct().doubleValue() : 0);
-			position.setGainLossPct(schwabPosition.gainLossPct() != null ? schwabPosition.gainLossPct().doubleValue() : 0);
-			position.setPercentOfAccount(schwabPosition.percentOfAccount());
-			position.setDividendYield(schwabPosition.dividendYield());
-			position.setPeRatio(schwabPosition.peRatio());
-			position.set52WeekLow(schwabPosition._52WeekLow());
-			position.set52WeekHigh(schwabPosition._52WeekHigh());
-			Double target = allocationMap.getAllocation(schwabPosition.symbol());
-			position.setTargetPct(target != null ? (target.doubleValue() * 100) : null);
-			position.setSharesToBuy(calculateSharesToBuy(position, accountSettings, state.getPositions().balance(), target));
-
-			for (SchwabTransaction schwabTransaction : symbolToTransactions.getOrDefault(schwabPosition.symbol(), List.of()))
+			output.setBalance(positions.balance());
+			output.setCash(positions.cash());
+			output.setPositionsTime(positions.time().toEpochSecond() * 1000);
+			for (SchwabPosition schwabPosition : positions.positions())
 			{
-				Transaction transaction = new Transaction();
-				transaction.setDate(schwabTransaction.date().toString());
-				transaction.setAction(schwabTransaction.action());
-				transaction.setQuantity(schwabTransaction.quantity().doubleValue());
-				transaction.setPrice(schwabTransaction.price().doubleValue());
-				transaction.setAmount(schwabTransaction.amount().doubleValue());
+				Position position = new Position();
+				position.setSymbol(schwabPosition.symbol());
+				position.setDescription(schwabPosition.description());
+				position.setQuantity(schwabPosition.quantity().intValue());
+				position.setPrice(schwabPosition.price().doubleValue());
+				position.setMarketValue(schwabPosition.marketValue());
+				position.setCostBasis(schwabPosition.costBasis() != null ? schwabPosition.costBasis().doubleValue() : 0);
+				position.setDayChangePct(schwabPosition.dayChangePct() != null ? schwabPosition.dayChangePct().doubleValue() : 0);
+				position.setGainLossPct(schwabPosition.gainLossPct() != null ? schwabPosition.gainLossPct().doubleValue() : 0);
+				position.setPercentOfAccount(schwabPosition.percentOfAccount());
+				position.setDividendYield(schwabPosition.dividendYield());
+				position.setPeRatio(schwabPosition.peRatio());
+				position.set52WeekLow(schwabPosition._52WeekLow());
+				position.set52WeekHigh(schwabPosition._52WeekHigh());
+				Double target = allocationMap.getAllocation(schwabPosition.symbol());
+				position.setTargetPct(target != null ? (target.doubleValue() * 100) : null);
+				position.setSharesToBuy(calculateSharesToBuy(position, accountSettings, positions.balance(), target));
 
-				position.addTransaction(transaction);
+				for (SchwabTransaction schwabTransaction : symbolToTransactions.getOrDefault(schwabPosition.symbol(), List.of()))
+				{
+					Transaction transaction = new Transaction();
+					transaction.setDate(schwabTransaction.date().toString());
+					transaction.setAction(schwabTransaction.action());
+					transaction.setQuantity(schwabTransaction.quantity().doubleValue());
+					transaction.setPrice(schwabTransaction.price().doubleValue());
+					transaction.setAmount(schwabTransaction.amount().doubleValue());
+
+					position.addTransaction(transaction);
+				}
+
+				for (SchwabOrder schwabOrder : symbolToOrders.getOrDefault(schwabPosition.symbol(), List.of()))
+				{
+					Order order = new Order();
+					order.setAction(schwabOrder.action());
+					order.setQuantity(schwabOrder.quantity());
+					order.setOrderType(schwabOrder.orderType());
+					order.setLimitPrice(schwabOrder.limitPrice());
+					order.setTiming(schwabOrder.timing().toString());
+
+					position.addOpenOrder(order);
+				}
+
+				output.getPositions().add(position);
 			}
-
-			for (SchwabOrder schwabOrder : symbolToOrders.getOrDefault(schwabPosition.symbol(), List.of()))
-			{
-				Order order = new Order();
-				order.setAction(schwabOrder.action());
-				order.setQuantity(schwabOrder.quantity());
-				order.setOrderType(schwabOrder.orderType());
-				order.setLimitPrice(schwabOrder.limitPrice());
-				order.setTiming(schwabOrder.timing().toString());
-
-				position.addOpenOrder(order);
-			}
-
-			output.getPositions().add(position);
 		}
+
 		return output;
 	}
 

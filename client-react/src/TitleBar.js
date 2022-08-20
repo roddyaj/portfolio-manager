@@ -8,19 +8,20 @@ function TitleBar(props) {
 	return (
 		<div className="pm-block">
 			<div style={{ display: "flex", alignItems: "center" }}>
-				<div style={{ marginRight: 12 }}>
+				<div>
 					<select name="accounts" id="accounts" value={selectedAccount != null ? selectedAccount : ""} onChange={(e) => setSelectedAccount(e.target.value)}>
 						{accountOptions}
 					</select>
 				</div>
 
-				<button type="button" style={{ marginRight: 12 }} onClick={() => requestPortfolio(selectedAccount)}>Refresh</button>
+				<button type="button" style={{ marginLeft: 12 }} onClick={() => requestPortfolio(selectedAccount)}>Refresh</button>
 
 				{
 					portfolio && (
 						<div>
-							<span style={{ marginRight: 12 }}>Balance: {portfolio.balance.toLocaleString()}</span>
-							<span style={{ marginRight: 12 }}>Cash: {portfolio.cash.toLocaleString()}</span>
+							<span style={{ marginLeft: 12 }}>Balance: {portfolio.balance.toLocaleString()}</span>
+							<span style={{ marginLeft: 12 }}>Cash: {portfolio.cash.toLocaleString()}</span>
+							<span style={{ marginLeft: 24 }}>{new Date(portfolio.positionsTime).toLocaleString()}</span>
 						</div>
 					)
 				}

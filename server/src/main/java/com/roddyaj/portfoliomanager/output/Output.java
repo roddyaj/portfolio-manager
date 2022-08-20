@@ -11,6 +11,8 @@ public class Output
 
 	private double cash;
 
+	private long positionsTime;
+
 	private List<Position> positions;
 
 	public String getAccountName()
@@ -41,6 +43,16 @@ public class Output
 	public void setCash(double cash)
 	{
 		this.cash = cash;
+	}
+
+	public long getPositionsTime()
+	{
+		return positionsTime;
+	}
+
+	public void setPositionsTime(long positionsTime)
+	{
+		this.positionsTime = positionsTime;
 	}
 
 	public List<Position> getPositions()
