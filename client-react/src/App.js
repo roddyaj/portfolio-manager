@@ -24,21 +24,27 @@ function App() {
 	}, []);
 
 	useEffect(() => {
-		const requestPortfolio = async () => {
-			const response = await fetch(`http://localhost:8090/portfolio?accountName=${selectedAccount}`);
-			return await response.json();
-		};
 		if (selectedAccount) {
-			requestPortfolio().then(setPortfolio);
+			requestPortfolio(selectedAccount);
 		}
 	}, [selectedAccount]);
+
+	function requestPortfolio(accountName) {
+		const request = async () => {
+			const response = await fetch(`http://localhost:8090/portfolio?accountName=${accountName}`);
+			return await response.json();
+		};
+		request().then(setPortfolio);
+	}
 
 	return (
 		<div>
 			<TitleBar
 				accounts={accounts}
+				selectedAccount={selectedAccount}
 				setSelectedAccount={setSelectedAccount}
 				portfolio={portfolio}
+				requestPortfolio={requestPortfolio}
 			/>
 			{
 				portfolio ? (
@@ -52,7 +58,7 @@ function App() {
 						</div>
 					</div>
 				) : (
-					<div>No data available for "{selectedAccount}".</div>
+					<div>No data available for {selectedAccount}.</div>
 				)
 			}
 		</div>
