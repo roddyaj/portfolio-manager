@@ -3,6 +3,7 @@ import TitleBar from './TitleBar'
 import Positions from './Positions'
 import Options from './Options'
 import 'bootstrap/dist/css/bootstrap.min.css';
+import 'bootstrap-icons/font/bootstrap-icons.css';
 import './App.css';
 
 function App() {

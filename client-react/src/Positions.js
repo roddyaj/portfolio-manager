@@ -31,6 +31,7 @@ function Positions(props) {
 				<thead>
 					<tr>
 						<th className="l">Ticker</th>
+						<th></th>
 						{showAllPositions && <th>#</th>}
 						<th>Price</th>
 						{showAllPositions && <th>Value</th>}
@@ -41,6 +42,7 @@ function Positions(props) {
 						{showAllPositions && <th>Ratio</th>}
 						<th className="l">Action</th>
 						<th className="c">Open</th>
+						<th></th>
 					</tr>
 				</thead>
 				<tbody>
@@ -65,7 +67,12 @@ function renderRow(position, i, showAllPositions) {
 	return (
 		<tr key={position.symbol}>
 			<td className="l">
-				<a href={`https://finance.yahoo.com/quote/${position.symbol}`} target="_blank" style={position.peRatio < 0 ? { backgroundColor: "#FDD" } : {}}>{position.symbol}</a>
+				<a href={`https://client.schwab.com/SymbolRouting.aspx?Symbol=${position.symbol}`} style={position.peRatio < 0 ? { backgroundColor: "#FDD" } : {}}>{position.symbol}</a>
+			</td>
+			<td>
+				<a href={`https://finance.yahoo.com/quote/${position.symbol}`}>
+					<img src="https://s.yimg.com/cv/apiv2/default/icons/favicon_y19_32x32_custom.svg" alt="Yahoo" width={14} height={14} />
+				</a>
 			</td>
 			{showAllPositions && <td>{position.quantity}</td>}
 			<td>{position.price.toFixed(2)}</td>
@@ -75,9 +82,10 @@ function renderRow(position, i, showAllPositions) {
 			{showAllPositions && <td>{position.percentOfAccount.toFixed(2) + "%"}</td>}
 			{showAllPositions && <td>{position.targetPct ? position.targetPct.toFixed(2) + "%" : ""}</td>}
 			{showAllPositions && <td>{position.targetPct ? (100 * position.percentOfAccount / position.targetPct).toFixed(1) + "%" : ""}</td>}
-			<td className="l">{position.sharesToBuy ? (<a href={actionUrl} target="_blank" onClick={() => copyClip(Math.abs(position.sharesToBuy))}>{actionText}</a>) : ""}</td>
+			<td className="l">{position.sharesToBuy ? (<a href={actionUrl} onClick={() => copyClip(Math.abs(position.sharesToBuy))}>{actionText}</a>) : ""}</td>
+			<td className="c"><a href={schwabOpenOrdersUrl}>{openOrderText}</a></td>
 			<OverlayTrigger trigger={['hover', 'focus']} placement="right" overlay={renderPositionPopup(position)}>
-				<td className="c"><span style={{ textDecoration: "underline" }}>{openOrderText}</span></td>
+				<td><i class="bi bi-info-circle"></i></td>
 			</OverlayTrigger>
 		</tr>
 	);
@@ -86,5 +94,7 @@ function renderRow(position, i, showAllPositions) {
 function copyClip(text) {
 	navigator.clipboard.writeText(text);
 }
+
+const schwabOpenOrdersUrl = "https://client.schwab.com/Trade/OrderStatus/ViewOrderStatus.aspx?ViewTypeFilter=Open";
 
 export default Positions;
