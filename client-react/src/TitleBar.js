@@ -19,7 +19,7 @@ function TitleBar(props) {
 				{
 					portfolio && (
 						<div>
-							<span style={{ marginLeft: 12 }}>Balance: {portfolio.balance.toLocaleString()}</span>
+							<span style={{ marginLeft: 24 }}>Balance: {portfolio.balance.toLocaleString()}</span>
 							<span style={{ marginLeft: 12 }}>Cash: {portfolio.cash.toLocaleString()}</span>
 							<span style={{ marginLeft: 24 }}>{new Date(portfolio.positionsTime).toLocaleString()}</span>
 						</div>

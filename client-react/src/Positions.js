@@ -1,6 +1,6 @@
 import { useState } from "react";
 import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
-import Popover from 'react-bootstrap/Popover';
+import { renderPositionPopup } from './PositionPopup'
 
 function Positions(props) {
 	const { portfolio } = props;
@@ -76,74 +76,10 @@ function renderRow(position, i, showAllPositions) {
 			{showAllPositions && <td>{position.targetPct ? position.targetPct.toFixed(2) + "%" : ""}</td>}
 			{showAllPositions && <td>{position.targetPct ? (100 * position.percentOfAccount / position.targetPct).toFixed(1) + "%" : ""}</td>}
 			<td className="l">{position.sharesToBuy ? (<a href={actionUrl} target="_blank" onClick={() => copyClip(Math.abs(position.sharesToBuy))}>{actionText}</a>) : ""}</td>
-			<td className="c">
-				{(openBuyCount || openSellCount) ? (
-					<OverlayTrigger trigger={['hover', 'focus']} placement="right" overlay={renderOpenOrdersPopover(position, i)}>
-						<span style={{ textDecoration: "underline" }}>{openOrderText}</span>
-					</OverlayTrigger>
-				) : ""}
-			</td>
+			<OverlayTrigger trigger={['hover', 'focus']} placement="right" overlay={renderPositionPopup(position)}>
+				<td className="c"><span style={{ textDecoration: "underline" }}>{openOrderText}</span></td>
+			</OverlayTrigger>
 		</tr>
-	);
-}
-
-function renderPositionPopover(position, i) {
-	const low = position['52WeekLow'];
-	const high = position['52WeekHigh'];
-	const priceRangePct = 100 * (position.price - low) / (high - low);
-
-	return (
-		<Popover id={`popover-position-${i}`} style={{ maxWidth: 400 }}>
-			<Popover.Header as="h3">{position.description}</Popover.Header>
-			<Popover.Body>
-				<table>
-					<tbody>
-						<tr><td className="l">52 week range:</td><td className="l">{`${low} - ${high} (${priceRangePct.toFixed(1)}%)`}</td></tr>
-						{position.dividendYield && <tr><td className="l">Dividend yield:</td><td className="l">{`${position.dividendYield}%`}</td></tr>}
-						{position.peRatio && <tr><td className="l">P/E ratio:</td><td className="l">{position.peRatio}</td></tr>}
-					</tbody>
-				</table>
-			</Popover.Body>
-		</Popover>
-	);
-}
-
-function renderOpenOrdersPopover(position, i) {
-	const sortedOrders = position.openOrders.sort((a, b) => b.limitPrice - a.limitPrice);
-	const rows = [];
-	rows.push(...sortedOrders.filter(o => o.action === 'Sell').map((order, j) => (
-		<tr key={`row-opensell-${i}-${j}`}>
-			<td>{order.action}</td>
-			<td>{order.quantity}</td>
-			<td>@</td>
-			<td>{order.limitPrice.toFixed(2)}</td>
-		</tr>
-	)));
-	rows.push((
-		<tr key={`row-openorder-${i}-price`}>
-			<td className="l" colSpan={3}>Current</td>
-			<td>{position.price.toFixed(2)}</td>
-		</tr>
-	));
-	rows.push(...sortedOrders.filter(o => o.action === 'Buy').map((order, j) => (
-		<tr key={`row-openbuy-${i}-${j}`}>
-			<td>{order.action}</td>
-			<td>{order.quantity}</td>
-			<td>@</td>
-			<td>{order.limitPrice.toFixed(2)}</td>
-		</tr>
-	)));
-	return (
-		<Popover id={`popover-openorder-${i}`} style={{ maxWidth: 400 }}>
-			<Popover.Header as="h3">Open Orders - {position.symbol}</Popover.Header>
-			<Popover.Body>
-				<table>
-					<tbody>
-						{rows}
-					</tbody>
-				</table>
-			</Popover.Body>
-		</Popover>
 	);
 }
 
