@@ -67,6 +67,9 @@ public final class PortfolioManager
 		SchwabPositionsData positions = state.getPositions();
 		if (positions != null)
 		{
+			Map<String, List<SchwabPosition>> symbolToOptions = positions.positions().stream().filter(p -> p.symbol().contains(" "))
+				.collect(Collectors.groupingBy(p -> p.symbol().split(" ")[0]));
+
 			output.setBalance(positions.balance());
 			output.setCash(positions.cash());
 			output.setPositionsTime(positions.time().toEpochSecond() * 1000);

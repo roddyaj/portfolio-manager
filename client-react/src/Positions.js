@@ -85,7 +85,7 @@ function renderRow(position, i, showAllPositions) {
 			<td className="l">{position.sharesToBuy ? (<a href={actionUrl} onClick={() => copyClip(Math.abs(position.sharesToBuy))}>{actionText}</a>) : ""}</td>
 			<td className="c"><a href={schwabOpenOrdersUrl}>{openOrderText}</a></td>
 			<OverlayTrigger trigger={['hover', 'focus']} placement="right" overlay={renderPositionPopup(position)}>
-				<td><i class="bi bi-info-circle"></i></td>
+				<td><i className="bi bi-info-circle"></i></td>
 			</OverlayTrigger>
 		</tr>
 	);

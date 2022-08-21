@@ -4,8 +4,8 @@ function Options(props) {
 	const optionPositions = portfolio.positions
 		.filter(p => p.symbol.includes(" ") && ((!isLong && p.quantity < 0) || (isLong && p.quantity > 0)))
 		.sort((a, b) => {
-			const [symbolA, expiryA, strikeA, typeA] = a.symbol.split(" ");
-			const [symbolB, expiryB, strikeB, typeB] = b.symbol.split(" ");
+			const [symbolA, , , typeA] = a.symbol.split(" ");
+			const [symbolB, , , typeB] = b.symbol.split(" ");
 			const value = typeA.localeCompare(typeB);
 			return value === 0 ? symbolA.localeCompare(symbolB) : value;
 		});
@@ -42,7 +42,7 @@ function renderRow(position) {
 	return (
 		<tr key={position.symbol}>
 			<td className="l">
-				<a href={`https://finance.yahoo.com/quote/${symbol}`} target="_blank">{symbol}</a>
+				<a href={`https://finance.yahoo.com/quote/${symbol}`}>{symbol}</a>
 			</td>
 			<td>{Math.abs(position.quantity)}</td>
 			<td>{type}</td>

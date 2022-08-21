@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.roddyaj.schwabparse.SchwabPosition;
 
 @JsonInclude(Include.NON_NULL)
 public class Position
@@ -40,6 +41,7 @@ public class Position
 
 	private List<Transaction> transactions;
 	private List<Order> openOrders;
+	private List<SchwabPosition> options;
 
 	public String getSymbol()
 	{
@@ -223,5 +225,22 @@ public class Position
 		if (openOrders == null)
 			openOrders = new ArrayList<>();
 		this.openOrders.add(openOrder);
+	}
+
+	public List<SchwabPosition> getOptions()
+	{
+		return options;
+	}
+
+	public void setOptions(List<SchwabPosition> options)
+	{
+		this.options = options;
+	}
+
+	public void addOption(SchwabPosition option)
+	{
+		if (options == null)
+			options = new ArrayList<>();
+		this.options.add(option);
 	}
 }
