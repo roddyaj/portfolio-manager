@@ -2,14 +2,43 @@ import Popover from 'react-bootstrap/Popover';
 
 export function renderPositionPopup(position) {
 	return (
-		<Popover id={`pospop-openorder-${position.symbol}`} style={{ maxWidth: 400 }}>
-			<Popover.Header as="h3">{position.description}</Popover.Header>
+		<Popover id={`pospop-openorder-${position.symbol}`} style={{ maxWidth: 400, font: "14px Arial, sans-serif" }}>
+			<Popover.Header as="h3">{position.symbol} - {position.description}</Popover.Header>
 			<Popover.Body>
+				{renderPriceInfo(position)}
 				{renderStatistics(position)}
 				{renderOpenOrders(position)}
+				{renderOptions(position)}
 				{renderTransactions(position)}
 			</Popover.Body>
 		</Popover>
+	);
+}
+
+function renderPriceInfo(position) {
+	const gainLoss = `${position.gainLossPct >= 0 ? "+" : ""}${position.gainLossPct}%`;
+	return (
+		<div>
+			<table>
+				<tbody>
+					<tr style={{ fontSize: 16 }}>
+						<td>{position.quantity}</td>
+						<td>shares x</td>
+						<td>{position.price.toFixed(2)}</td>
+						<td>=</td>
+						<td>{position.marketValue.toFixed(2)}</td>
+						<td rowSpan={2} style={{ color: position.gainLossPct >= 0 ? "green" : "#C00", paddingLeft: 8 }}>{gainLoss}</td>
+					</tr>
+					<tr style={{ fontSize: 12, backgroundColor: "revert" }}>
+						<td></td>
+						<td></td>
+						<td className="c">({(position.costBasis / position.quantity).toFixed(2)})</td>
+						<td></td>
+						<td className="c">({position.costBasis.toFixed(2)})</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
 	);
 }
 
@@ -19,8 +48,8 @@ function renderStatistics(position) {
 	const priceRangePct = 100 * (position.price - low) / (high - low);
 
 	return (
-		<div>
-			<span style={{ fontWeight: "bold" }}>Statistics</span>
+		<div style={{ marginTop: 16 }}>
+			<div style={{ fontWeight: "bold", marginBottom: 2 }}>Statistics</div>
 			<table>
 				<tbody>
 					<tr><td className="l">52 week range:</td><td className="l">{`${low} - ${high} (${priceRangePct.toFixed(1)}%)`}</td></tr>
@@ -62,7 +91,7 @@ function renderOpenOrders(position) {
 	)));
 	return (
 		<div style={{ marginTop: 16 }}>
-			<span style={{ fontWeight: "bold" }}>Open Orders</span>
+			<div style={{ fontWeight: "bold", marginBottom: 2 }}>Open Orders</div>
 			<table>
 				<tbody>
 					{rows}
@@ -72,21 +101,49 @@ function renderOpenOrders(position) {
 	);
 }
 
+function renderOptions(position) {
+	if (!position.options)
+		return null;
+
+	const rows = position.options.filter(o => o.quantity < 0).map((option, i) => {
+		const [symbol, expiry, strike, type] = option.symbol.split(" ");
+		return (
+			<tr key={`pospop-option-${symbol}-${i}`}>
+				<td>{Math.abs(option.quantity)}</td>
+				<td>{type}</td>
+				<td>{expiry}</td>
+				<td>{strike}</td>
+			</tr>
+		);
+	});
+	return (
+		<div style={{ marginTop: 16 }}>
+			<div style={{ fontWeight: "bold", marginBottom: 2 }}>Short Options</div>
+			<table>
+				<tbody>
+					{rows}
+				</tbody>
+			</table>
+		</div>
+	);
+}
+
+
 function renderTransactions(position) {
 	if (!position.transactions)
 		return null;
 
-	const rows = position.transactions.slice(0, 10).map((transactions, i) => (
+	const rows = position.transactions.slice(0, 10).map((transaction, i) => (
 		<tr key={`pospop-transaction-${position.symbol}-${i}`}>
-			<td>{transactions.date}</td>
-			<td>{transactions.action}</td>
-			<td>{transactions.quantity}</td>
-			<td>{transactions.price.toFixed(2)}</td>
+			<td>{transaction.date}</td>
+			<td>{transaction.action}</td>
+			<td>{transaction.quantity}</td>
+			<td>{transaction.price.toFixed(2)}</td>
 		</tr>
 	));
 	return (
 		<div style={{ marginTop: 16 }}>
-			<span style={{ fontWeight: "bold" }}>Transactions</span>
+			<div style={{ fontWeight: "bold", marginBottom: 2 }}>Transactions</div>
 			<table>
 				<tbody>
 					{rows}

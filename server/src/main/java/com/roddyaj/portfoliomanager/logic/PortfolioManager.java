@@ -75,23 +75,7 @@ public final class PortfolioManager
 			output.setPositionsTime(positions.time().toEpochSecond() * 1000);
 			for (SchwabPosition schwabPosition : positions.positions())
 			{
-				Position position = new Position();
-				position.setSymbol(schwabPosition.symbol());
-				position.setDescription(schwabPosition.description());
-				position.setQuantity(schwabPosition.quantity().intValue());
-				position.setPrice(schwabPosition.price().doubleValue());
-				position.setMarketValue(schwabPosition.marketValue());
-				position.setCostBasis(schwabPosition.costBasis() != null ? schwabPosition.costBasis().doubleValue() : 0);
-				position.setDayChangePct(schwabPosition.dayChangePct() != null ? schwabPosition.dayChangePct().doubleValue() : 0);
-				position.setGainLossPct(schwabPosition.gainLossPct() != null ? schwabPosition.gainLossPct().doubleValue() : 0);
-				position.setPercentOfAccount(schwabPosition.percentOfAccount());
-				position.setDividendYield(schwabPosition.dividendYield());
-				position.setPeRatio(schwabPosition.peRatio());
-				position.set52WeekLow(schwabPosition._52WeekLow());
-				position.set52WeekHigh(schwabPosition._52WeekHigh());
-				Double target = allocationMap.getAllocation(schwabPosition.symbol());
-				position.setTargetPct(target != null ? (target.doubleValue() * 100) : null);
-				position.setSharesToBuy(calculateSharesToBuy(position, accountSettings, positions.balance(), target));
+				Position position = toPosition(schwabPosition, accountSettings, allocationMap, positions.balance());
 
 				for (SchwabTransaction schwabTransaction : symbolToTransactions.getOrDefault(schwabPosition.symbol(), List.of()))
 				{
@@ -117,6 +101,12 @@ public final class PortfolioManager
 					position.addOpenOrder(order);
 				}
 
+				for (SchwabPosition schwabOption : symbolToOptions.getOrDefault(schwabPosition.symbol(), List.of()))
+				{
+					Position option = toPosition(schwabOption, accountSettings, allocationMap, positions.balance());
+					position.addOption(option);
+				}
+
 				output.getPositions().add(position);
 			}
 		}
@@ -124,7 +114,31 @@ public final class PortfolioManager
 		return output;
 	}
 
-	private Integer calculateSharesToBuy(Position position, AccountSettings accountSettings, double accountBalance, Double target)
+	private static Position toPosition(SchwabPosition schwabPosition, AccountSettings accountSettings, AllocationMap allocationMap,
+		double accountBalance)
+	{
+		Position position = new Position();
+		position.setSymbol(schwabPosition.symbol());
+		position.setDescription(schwabPosition.description());
+		position.setQuantity(schwabPosition.quantity().intValue());
+		position.setPrice(schwabPosition.price().doubleValue());
+		position.setMarketValue(schwabPosition.marketValue());
+		position.setCostBasis(schwabPosition.costBasis() != null ? schwabPosition.costBasis().doubleValue() : 0);
+		position.setDayChangePct(schwabPosition.dayChangePct() != null ? schwabPosition.dayChangePct().doubleValue() : 0);
+		position.setGainLossPct(schwabPosition.gainLossPct() != null ? schwabPosition.gainLossPct().doubleValue() : 0);
+		position.setPercentOfAccount(schwabPosition.percentOfAccount());
+		position.setDividendYield(schwabPosition.dividendYield());
+		position.setPeRatio(schwabPosition.peRatio());
+		position.set52WeekLow(schwabPosition._52WeekLow());
+		position.set52WeekHigh(schwabPosition._52WeekHigh());
+		Double target = allocationMap.getAllocation(schwabPosition.symbol());
+		position.setTargetPct(target != null ? (target.doubleValue() * 100) : null);
+		position.setSharesToBuy(calculateSharesToBuy(position, accountSettings, accountBalance, target));
+
+		return position;
+	}
+
+	private static Integer calculateSharesToBuy(Position position, AccountSettings accountSettings, double accountBalance, Double target)
 	{
 		Integer sharesToBuy = null;
 		if (target != null)
@@ -141,7 +155,7 @@ public final class PortfolioManager
 		return sharesToBuy;
 	}
 
-	static int round(double value, double cutoff)
+	private static int round(double value, double cutoff)
 	{
 		return (int)(value >= 0 ? value + (1 - cutoff) : value - (1 - cutoff));
 	}

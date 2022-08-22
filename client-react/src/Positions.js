@@ -7,9 +7,12 @@ function Positions(props) {
 
 	const [showAllPositions, setShowAllPositions] = useState(true);
 
-	const viewPositions = portfolio.positions
-		.filter(p => !p.symbol.includes(" ") && (showAllPositions || p.sharesToBuy))
-		.sort((a, b) => b.marketValue - a.marketValue);
+	const viewPositions = portfolio.positions.filter(p => !p.symbol.includes(" ") && (showAllPositions || p.sharesToBuy));
+	if (showAllPositions) {
+		viewPositions.sort((a, b) => b.marketValue - a.marketValue);
+	} else {
+		viewPositions.sort((a, b) => (a.sharesToBuy * a.price) - (b.sharesToBuy * b.price));
+	}
 
 	if (viewPositions.length === 0) {
 		return null;
