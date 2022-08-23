@@ -69,17 +69,17 @@ public abstract class AbstractMonitor
 		if (!files.isEmpty())
 		{
 			file = files.get(0);
-//			for (int i = 1; i < files.size(); i++)
-//			{
-//				try
-//				{
-//					Files.delete(files.get(i));
-//				}
-//				catch (IOException e)
-//				{
-//					e.printStackTrace();
-//				}
-//			}
+			for (int i = 1; i < files.size(); i++)
+			{
+				try
+				{
+					Files.delete(files.get(i));
+				}
+				catch (IOException e)
+				{
+					e.printStackTrace();
+				}
+			}
 		}
 		return file;
 	}
