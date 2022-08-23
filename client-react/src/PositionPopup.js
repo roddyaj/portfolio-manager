@@ -16,7 +16,8 @@ export function renderPositionPopup(position) {
 }
 
 function renderPriceInfo(position) {
-	const gainLoss = `${position.gainLossPct >= 0 ? "+" : ""}${position.gainLossPct}%`;
+	const gainLoss = `${position.gainLossPct >= 0 ? "+" : ""}${position.gainLossPct.toFixed(2)}%`;
+	const dayChange = `${position.dayChangePct >= 0 ? "+" : ""}${position.dayChangePct.toFixed(2)}%`;
 	return (
 		<div>
 			<table>
@@ -38,6 +39,7 @@ function renderPriceInfo(position) {
 					</tr>
 				</tbody>
 			</table>
+			<div style={{ marginTop: 6, marginLeft: 1 }}>Day: <span style={{ color: position.dayChangePct >= 0 ? "green" : "#C00"}}>{dayChange}</span></div>
 		</div>
 	);
 }
