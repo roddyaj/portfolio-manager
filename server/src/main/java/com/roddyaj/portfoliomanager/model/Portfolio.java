@@ -4,7 +4,7 @@ import com.roddyaj.schwabparse.SchwabOrdersData;
 import com.roddyaj.schwabparse.SchwabPositionsData;
 import com.roddyaj.schwabparse.SchwabTransactionsData;
 
-public class PortfolioState
+public class Portfolio
 {
 	private SchwabPositionsData positions;
 

@@ -2,12 +2,12 @@ package com.roddyaj.portfoliomanager.schwab;
 
 import java.nio.file.Path;
 
-import com.roddyaj.portfoliomanager.model.PortfolioState;
+import com.roddyaj.portfoliomanager.model.Portfolio;
 import com.roddyaj.schwabparse.SchwabTransactionsReader;
 
 public class TransactionsMonitor extends AbstractMonitor
 {
-	public TransactionsMonitor(Path dir, String accountName, String accountNumber, PortfolioState state)
+	public TransactionsMonitor(Path dir, String accountName, String accountNumber, Portfolio state)
 	{
 		super(dir, accountName, accountNumber, state);
 	}
@@ -26,7 +26,7 @@ public class TransactionsMonitor extends AbstractMonitor
 	}
 
 	@Override
-	protected void updateState(Path file, PortfolioState state)
+	protected void updateState(Path file, Portfolio state)
 	{
 		state.setTransactions(new SchwabTransactionsReader().read(file));
 	}

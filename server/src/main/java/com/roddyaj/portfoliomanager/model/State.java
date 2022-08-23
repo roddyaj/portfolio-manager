@@ -1,9 +1,10 @@
 package com.roddyaj.portfoliomanager.model;
 
+import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.concurrent.atomic.AtomicReference;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.roddyaj.portfoliomanager.settings.Settings;
 
 public final class State
@@ -15,8 +16,6 @@ public final class State
 		return INSTANCE;
 	}
 
-	private final AtomicReference<Settings> settings = new AtomicReference<>();
-
 	public Path getInputDir()
 	{
 		return Paths.get(System.getProperty("user.home"), "Downloads");
@@ -24,12 +23,17 @@ public final class State
 
 	public Settings getSettings()
 	{
-		return settings.get();
-	}
-
-	public void setSettings(Settings settings)
-	{
-		this.settings.set(settings);
+		Settings settings = null;
+		Path settingsFile = Paths.get(Paths.get(System.getProperty("user.home"), ".invest").toString(), "settings.json");
+		try
+		{
+			settings = new ObjectMapper().readValue(settingsFile.toFile(), Settings.class);
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+		}
+		return settings;
 	}
 
 	private State()

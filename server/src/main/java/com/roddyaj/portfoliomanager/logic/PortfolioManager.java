@@ -5,9 +5,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.roddyaj.portfoliomanager.model.Message;
-import com.roddyaj.portfoliomanager.model.PortfolioState;
+import com.roddyaj.portfoliomanager.model.Portfolio;
 import com.roddyaj.portfoliomanager.output.Order;
 import com.roddyaj.portfoliomanager.output.Output;
 import com.roddyaj.portfoliomanager.output.Position;
@@ -17,6 +18,7 @@ import com.roddyaj.portfoliomanager.schwab.OrdersMonitor;
 import com.roddyaj.portfoliomanager.schwab.PositionsMonitor;
 import com.roddyaj.portfoliomanager.schwab.TransactionsMonitor;
 import com.roddyaj.portfoliomanager.settings.AccountSettings;
+import com.roddyaj.portfoliomanager.settings.Settings;
 import com.roddyaj.schwabparse.SchwabOrder;
 import com.roddyaj.schwabparse.SchwabOrdersData;
 import com.roddyaj.schwabparse.SchwabPosition;
@@ -26,14 +28,18 @@ import com.roddyaj.schwabparse.SchwabTransactionsData;
 
 public final class PortfolioManager
 {
-	public Output process(Path inputDir, String accountName, String accountNumber, AccountSettings accountSettings)
+	public Output process(Path inputDir, String accountName, Settings settings)
 	{
-		PortfolioState state = new PortfolioState();
+		String accountNumber = Stream.of(settings.getAccounts()).filter(a -> a.getName().equals(accountName)).map(AccountSettings::getAccountNumber)
+			.findAny().orElse(null);
+		AccountSettings accountSettings = settings.getAccount(accountName);
+
+		Portfolio portfolio = new Portfolio();
 
 		List<AbstractMonitor> monitors = new ArrayList<>();
-		monitors.add(new PositionsMonitor(inputDir, accountName, accountNumber, state));
-		monitors.add(new TransactionsMonitor(inputDir, accountName, accountNumber, state));
-		monitors.add(new OrdersMonitor(inputDir, accountName, accountNumber, state));
+		monitors.add(new PositionsMonitor(inputDir, accountName, accountNumber, portfolio));
+		monitors.add(new TransactionsMonitor(inputDir, accountName, accountNumber, portfolio));
+		monitors.add(new OrdersMonitor(inputDir, accountName, accountNumber, portfolio));
 
 		boolean anyUpdated = false;
 		for (AbstractMonitor monitor : monitors)
@@ -41,22 +47,22 @@ public final class PortfolioManager
 
 		Output output = null;
 		if (anyUpdated)
-			output = createOutput(accountName, accountSettings, state);
+			output = createOutput(accountName, accountSettings, portfolio);
 
 		return output;
 	}
 
-	private Output createOutput(String accountName, AccountSettings accountSettings, PortfolioState state)
+	private Output createOutput(String accountName, AccountSettings accountSettings, Portfolio portfolio)
 	{
 		Output output = new Output();
 		output.setAccountName(accountName);
 
-		SchwabTransactionsData transactions = state.getTransactions();
+		SchwabTransactionsData transactions = portfolio.getTransactions();
 		Map<String, List<SchwabTransaction>> symbolToTransactions = transactions != null ? transactions.transactions().stream()
 			.filter(t -> t.symbol() != null && t.quantity() != null && t.price() != null).collect(Collectors.groupingBy(SchwabTransaction::symbol))
 			: Map.of();
 
-		SchwabOrdersData orders = state.getOrders();
+		SchwabOrdersData orders = portfolio.getOrders();
 		Map<String, List<SchwabOrder>> symbolToOrders = orders != null
 			? orders.getOpenOrders().stream().filter(o -> o.symbol() != null).collect(Collectors.groupingBy(SchwabOrder::symbol))
 			: Map.of();
@@ -64,7 +70,7 @@ public final class PortfolioManager
 		List<Message> messages = new ArrayList<>();
 		AllocationMap allocationMap = new AllocationMap(accountSettings.getAllocations(), messages);
 
-		SchwabPositionsData positions = state.getPositions();
+		SchwabPositionsData positions = portfolio.getPositions();
 		if (positions != null)
 		{
 			Map<String, List<SchwabPosition>> symbolToOptions = positions.positions().stream().filter(p -> p.symbol().contains(" "))
