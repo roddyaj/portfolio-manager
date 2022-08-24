@@ -42,7 +42,7 @@ function Positions(props) {
 						{showAllPositions && <th>G/L</th>}
 						{showAllPositions && <th>Actual</th>}
 						{showAllPositions && <th>Target</th>}
-						{showAllPositions && <th>Ratio</th>}
+						<th>Ratio</th>
 						<th className="l">Action</th>
 						<th className="c">Open</th>
 						<th></th>
@@ -84,7 +84,7 @@ function renderRow(position, i, showAllPositions) {
 			{showAllPositions && <td style={{ color: position.gainLossPct >= 0 ? "green" : "#C00" }}>{Math.abs(position.gainLossPct).toFixed(2) + "%"}</td>}
 			{showAllPositions && <td>{position.percentOfAccount.toFixed(2) + "%"}</td>}
 			{showAllPositions && <td>{position.targetPct ? position.targetPct.toFixed(2) + "%" : ""}</td>}
-			{showAllPositions && <td>{position.targetPct ? (100 * position.percentOfAccount / position.targetPct).toFixed(1) + "%" : ""}</td>}
+			<td>{position.targetPct ? (100 * position.percentOfAccount / position.targetPct).toFixed(1) + "%" : ""}</td>
 			<td className="l">{position.sharesToBuy ? (<a href={actionUrl} onClick={() => copyClip(Math.abs(position.sharesToBuy))}>{actionText}</a>) : ""}</td>
 			<td className="c"><a href={schwabOpenOrdersUrl}>{openOrderText}</a></td>
 			<OverlayTrigger trigger={['hover', 'focus']} placement="right" overlay={renderPositionPopup(position)}>
