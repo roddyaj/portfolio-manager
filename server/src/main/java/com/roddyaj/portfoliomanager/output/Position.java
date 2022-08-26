@@ -37,6 +37,7 @@ public class Position
 
 	private Double targetPct;
 	private Integer sharesToBuy;
+	private Integer callsToSell;
 
 	private List<Transaction> transactions;
 	private List<Order> openOrders;
@@ -172,6 +173,11 @@ public class Position
 		this._52WeekHigh = _52WeekHigh;
 	}
 
+	public boolean isOption()
+	{
+		return symbol.indexOf(' ') != -1;
+	}
+
 	public Double getTargetPct()
 	{
 		return targetPct;
@@ -185,6 +191,16 @@ public class Position
 	public Integer getSharesToBuy()
 	{
 		return sharesToBuy;
+	}
+
+	public Integer getCallsToSell()
+	{
+		return callsToSell;
+	}
+
+	public void setCallsToSell(Integer callsToSell)
+	{
+		this.callsToSell = callsToSell;
 	}
 
 	public void setSharesToBuy(Integer sharesToBuy)

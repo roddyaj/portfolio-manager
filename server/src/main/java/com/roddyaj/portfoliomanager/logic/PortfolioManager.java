@@ -47,12 +47,12 @@ public final class PortfolioManager
 
 		Output output = null;
 		if (anyUpdated)
-			output = createOutput(accountName, accountSettings, portfolio);
+			output = createOutput(accountName, settings, accountSettings, portfolio);
 
 		return output;
 	}
 
-	private Output createOutput(String accountName, AccountSettings accountSettings, Portfolio portfolio)
+	private Output createOutput(String accountName, Settings settings, AccountSettings accountSettings, Portfolio portfolio)
 	{
 		Output output = new Output();
 		output.setAccountName(accountName);
@@ -73,7 +73,7 @@ public final class PortfolioManager
 		SchwabPositionsData positions = portfolio.getPositions();
 		if (positions != null)
 		{
-			Map<String, List<SchwabPosition>> symbolToOptions = positions.positions().stream().filter(p -> p.symbol().contains(" "))
+			Map<String, List<SchwabPosition>> symbolToOptions = positions.positions().stream().filter(SchwabPosition::isOption)
 				.collect(Collectors.groupingBy(p -> p.symbol().split(" ")[0]));
 
 			output.setBalance(positions.balance());
@@ -81,7 +81,10 @@ public final class PortfolioManager
 			output.setPositionsTime(positions.time().toEpochSecond() * 1000);
 			for (SchwabPosition schwabPosition : positions.positions())
 			{
-				Position position = toPosition(schwabPosition, accountSettings, allocationMap, positions.balance());
+				Position position = toPosition(schwabPosition);
+				Double target = allocationMap.getAllocation(schwabPosition.symbol());
+				position.setTargetPct(target != null ? (target.doubleValue() * 100) : null);
+				position.setSharesToBuy(calculateSharesToBuy(position, accountSettings, positions.balance(), target));
 
 				for (SchwabTransaction schwabTransaction : symbolToTransactions.getOrDefault(schwabPosition.symbol(), List.of()))
 				{
@@ -109,9 +112,11 @@ public final class PortfolioManager
 
 				for (SchwabPosition schwabOption : symbolToOptions.getOrDefault(schwabPosition.symbol(), List.of()))
 				{
-					Position option = toPosition(schwabOption, accountSettings, allocationMap, positions.balance());
+					Position option = toPosition(schwabOption);
 					position.addOption(option);
 				}
+
+				position.setCallsToSell(calculateCallsToSell(position, settings, accountSettings));
 
 				output.getPositions().add(position);
 			}
@@ -120,8 +125,7 @@ public final class PortfolioManager
 		return output;
 	}
 
-	private static Position toPosition(SchwabPosition schwabPosition, AccountSettings accountSettings, AllocationMap allocationMap,
-		double accountBalance)
+	private static Position toPosition(SchwabPosition schwabPosition)
 	{
 		Position position = new Position();
 		position.setSymbol(schwabPosition.symbol());
@@ -137,10 +141,6 @@ public final class PortfolioManager
 		position.setPeRatio(schwabPosition.peRatio());
 		position.set52WeekLow(schwabPosition._52WeekLow());
 		position.set52WeekHigh(schwabPosition._52WeekHigh());
-		Double target = allocationMap.getAllocation(schwabPosition.symbol());
-		position.setTargetPct(target != null ? (target.doubleValue() * 100) : null);
-		position.setSharesToBuy(calculateSharesToBuy(position, accountSettings, accountBalance, target));
-
 		return position;
 	}
 
@@ -159,6 +159,21 @@ public final class PortfolioManager
 				sharesToBuy = quantity;
 		}
 		return sharesToBuy;
+	}
+
+	private static Integer calculateCallsToSell(Position position, Settings settings, AccountSettings accountSettings)
+	{
+		Integer availableCalls = null;
+		if (accountSettings.isOptionsEnabled() && !position.isOption() && position.getQuantity() >= 100
+			&& !settings.excludeOption(position.getSymbol()))
+		{
+			int totalCallsSold = position.getOptions() != null ? Math.abs(
+				position.getOptions().stream().filter(o -> o.getSymbol().endsWith("C") && o.getQuantity() < 0).mapToInt(Position::getQuantity).sum())
+				: 0;
+			int availableShares = position.getQuantity() - totalCallsSold * 100;
+			availableCalls = (int)Math.floor(availableShares / 100.0);
+		}
+		return availableCalls;
 	}
 
 	private static int round(double value, double cutoff)
