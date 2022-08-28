@@ -5,32 +5,31 @@ import { renderPositionPopup } from './PositionPopup'
 function Positions(props) {
 	const { portfolio } = props;
 
-	const [showAllPositions, setShowAllPositions] = useState(true);
+	const [mode, setMode] = useState("view");
 
-	const viewPositions = portfolio.positions.filter(p => !p.symbol.includes(" ") && (showAllPositions || p.sharesToBuy));
-	if (showAllPositions) {
-		viewPositions.sort((a, b) => b.marketValue - a.marketValue);
-	} else {
-		viewPositions.sort((a, b) => (a.sharesToBuy * a.price) - (b.sharesToBuy * b.price));
+	let viewPositions = portfolio.positions.filter(p => !p.symbol.includes(" "));
+	if (mode === "view") {
+		viewPositions = viewPositions.sort((a, b) => b.marketValue - a.marketValue);
+	} else if (mode === "shares") {
+		viewPositions = viewPositions.filter(p => p.sharesToBuy).sort((a, b) => (a.sharesToBuy * a.price) - (b.sharesToBuy * b.price));
+	} else if (mode === "calls") {
+		viewPositions = viewPositions.filter(p => p.callsToSell).sort((a, b) => b.dayChangePct - a.dayChangePct);
 	}
 
-	if (viewPositions.length === 0) {
-		return null;
-	}
-
-	const showCallsToSell = viewPositions.filter(p => p.callsToSell > 0).length > 0;
+	const showAllPositions = mode === "view";
 
 	return (
 		<div className="pm-block">
 			<div className="pm-heading">
-				<div className="pm-title">Positions ({viewPositions.length})</div>
-
-				<div style={{ marginLeft: 12 }}>
-					<input type="radio" name="positionVisibility" id="visibility-all" value="all" checked={showAllPositions} onChange={() => setShowAllPositions(true)} />
-					<label htmlFor="visibility-all" style={{ padding: 2, marginRight: 4 }}>All</label>
-					<input type="radio" name="positionVisibility" id="visibility-actions" value="actions" checked={!showAllPositions} onChange={() => setShowAllPositions(false)} />
-					<label htmlFor="visibility-actions" style={{ padding: 2, marginRight: 4 }}>Actions</label>
+				<div className="pm-title">
+					<input type="radio" name="positionMode" id="mode-view" value="view" checked={mode === "view"} onChange={(e) => setMode(e.target.value)} />
+					<label htmlFor="mode-view" style={{ paddingLeft: 3, marginRight: 10 }}>Positions</label>
+					<input type="radio" name="positionMode" id="mode-trade-shares" value="shares" checked={mode === "shares"} onChange={(e) => setMode(e.target.value)} />
+					<label htmlFor="mode-trade-shares" style={{ paddingLeft: 3, marginRight: 10 }}>Trades</label>
+					<input type="radio" name="positionMode" id="mode-sell-calls" value="calls" checked={mode === "calls"} onChange={(e) => setMode(e.target.value)} />
+					<label htmlFor="mode-sell-calls" style={{ paddingLeft: 3, marginRight: 10 }}>Calls to Sell</label>
 				</div>
+				<span>({viewPositions.length})</span>
 			</div>
 			<table>
 				<thead>
@@ -44,25 +43,27 @@ function Positions(props) {
 						<th>G/L</th>
 						{showAllPositions && <th>Actual</th>}
 						{showAllPositions && <th>Target</th>}
-						<th>Ratio</th>
-						{!showAllPositions && <th className="l">Action</th>}
-						<th className="c">Open</th>
-						{!showAllPositions && showCallsToSell && <th className="c">Calls to Sell</th>}
+						{mode !== "calls" && <th>Ratio</th>}
+						{mode === "shares" && <th className="c">Trade</th>}
+						{mode === "shares" && <th></th>}
+						{mode === "calls" && <th className="c">Sell Calls</th>}
 						<th></th>
 					</tr>
 				</thead>
 				<tbody>
-					{viewPositions.map(p => renderRow(p, showAllPositions, showCallsToSell))}
+					{viewPositions.map(p => renderRow(p, mode))}
 				</tbody>
 			</table>
 		</div>
 	);
 }
 
-function renderRow(position, showAllPositions, showCallsToSell) {
+function renderRow(position, mode) {
+	const showAllPositions = mode === "view";
 	const action = position.sharesToBuy > 0 ? "Buy" : "Sell";
 	const actionText = `${action} ${Math.abs(position.sharesToBuy)}`;
 	const actionUrl = `https://client.schwab.com/Areas/Trade/Allinone/index.aspx?tradeaction=${action}&Symbol=${position.symbol}`;
+	const schwabOpenOrdersUrl = "https://client.schwab.com/Trade/OrderStatus/ViewOrderStatus.aspx?ViewTypeFilter=Open";
 	const optionChainUrl = `https://client.schwab.com/Areas/Trade/Options/Chains/Index.aspx#symbol/${position.symbol}`;
 	const openBuyCount = position.openOrders ? position.openOrders.filter(o => o.action === "Buy").map(o => o.quantity).reduce((tot, cur) => tot + cur, 0) : 0;
 	const openSellCount = position.openOrders ? position.openOrders.filter(o => o.action === "Sell").map(o => o.quantity).reduce((tot, cur) => tot + cur, 0) : 0;
@@ -88,12 +89,12 @@ function renderRow(position, showAllPositions, showCallsToSell) {
 			<td style={{ color: position.gainLossPct >= 0 ? "green" : "#C00" }}>{Math.abs(position.gainLossPct).toFixed(2) + "%"}</td>
 			{showAllPositions && <td>{position.percentOfAccount.toFixed(2) + "%"}</td>}
 			{showAllPositions && <td>{position.targetPct ? position.targetPct.toFixed(2) + "%" : ""}</td>}
-			<td>{position.targetPct ? (100 * position.percentOfAccount / position.targetPct).toFixed(1) + "%" : ""}</td>
-			{!showAllPositions && <td className="l">{position.sharesToBuy ? (<a href={actionUrl} onClick={() => copyClip(Math.abs(position.sharesToBuy))}>{actionText}</a>) : ""}</td>}
-			<td className="c"><a href={schwabOpenOrdersUrl}>{openOrderText}</a></td>
-			{!showAllPositions && showCallsToSell && <td className="c">{position.callsToSell ? (<a href={optionChainUrl}>{position.callsToSell}</a>) : ""}</td>}
+			{mode !== "calls" && <td>{position.targetPct ? (100 * position.percentOfAccount / position.targetPct).toFixed(1) + "%" : ""}</td>}
+			{mode === "shares" && <td className="c"><a href={actionUrl}><button style={{ minWidth: 55 }} onClick={() => copyClip(Math.abs(position.sharesToBuy))}>{actionText}</button></a></td>}
+			{mode === "shares" && <td className="c"><a href={schwabOpenOrdersUrl}>{openOrderText}</a></td>}
+			{mode === "calls" && <td className="c"><a href={optionChainUrl}><button>Sell {position.callsToSell}</button></a></td>}
 			<OverlayTrigger trigger={['hover', 'focus']} placement="right" overlay={renderPositionPopup(position)}>
-				<td><i className="bi bi-info-circle"></i></td>
+				<td><i className="bi bi-info-circle" style={{ marginLeft: 6 }}></i></td>
 			</OverlayTrigger>
 		</tr>
 	);
@@ -102,7 +103,5 @@ function renderRow(position, showAllPositions, showCallsToSell) {
 function copyClip(text) {
 	navigator.clipboard.writeText(text);
 }
-
-const schwabOpenOrdersUrl = "https://client.schwab.com/Trade/OrderStatus/ViewOrderStatus.aspx?ViewTypeFilter=Open";
 
 export default Positions;

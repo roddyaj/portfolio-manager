@@ -17,7 +17,8 @@ function Options(props) {
 	return (
 		<div className="pm-block">
 			<div className="pm-heading">
-				<div className="pm-title">{`${isLong ? "Long" : "Short"} Options (${optionPositions.length})`}</div>
+				<div className="pm-title">{`${isLong ? "Long" : "Short"} Options`}</div>
+				<span style={{ marginLeft: 10 }}>({optionPositions.length})</span>
 			</div>
 			<table>
 				<thead>
