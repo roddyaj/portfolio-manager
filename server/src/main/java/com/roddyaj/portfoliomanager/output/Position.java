@@ -31,8 +31,8 @@ public class Position
 	private Double _52WeekLow;
 	private Double _52WeekHigh;
 //	Integer volume;
-//	Double intrinsicValue;
-//	String inTheMoney;
+	private Double underlyingPrice;
+	private Boolean inTheMoney;
 //	String securityType;
 
 	private Double targetPct;
@@ -171,6 +171,26 @@ public class Position
 	public void set52WeekHigh(Double _52WeekHigh)
 	{
 		this._52WeekHigh = _52WeekHigh;
+	}
+
+	public Double getUnderlyingPrice()
+	{
+		return underlyingPrice;
+	}
+
+	public void setUnderlyingPrice(Double underlyingPrice)
+	{
+		this.underlyingPrice = underlyingPrice;
+	}
+
+	public Boolean getInTheMoney()
+	{
+		return inTheMoney;
+	}
+
+	public void setInTheMoney(Boolean inTheMoney)
+	{
+		this.inTheMoney = inTheMoney;
 	}
 
 	public boolean isOption()

@@ -30,8 +30,9 @@ function Income(props) {
 
 function renderRow(monthIncome) {
 	const { month, optionsIncome, dividendIncome, contrib } = monthIncome;
+	const rowStyle = month === "Total" ? { borderTop: "1px solid grey" } : null;
 	return (
-		<tr key={month}>
+		<tr key={month} style={rowStyle}>
 			<td className="l">{month}</td>
 			<td>{optionsIncome.toFixed(2)}</td>
 			<td>{dividendIncome.toFixed(2)}</td>

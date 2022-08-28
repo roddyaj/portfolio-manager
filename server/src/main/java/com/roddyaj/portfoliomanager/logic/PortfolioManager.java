@@ -178,6 +178,14 @@ public final class PortfolioManager
 		position.setPeRatio(schwabPosition.peRatio());
 		position.set52WeekLow(schwabPosition._52WeekLow());
 		position.set52WeekHigh(schwabPosition._52WeekHigh());
+		if (schwabPosition.intrinsicValue() != null)
+		{
+			String[] tokens = schwabPosition.symbol().split(" ");
+			double strike = Double.parseDouble(tokens[2]);
+			String type = tokens[3];
+			position.setUnderlyingPrice(type.equals("P") ? strike - schwabPosition.intrinsicValue() : strike + schwabPosition.intrinsicValue());
+			position.setInTheMoney("ITM".equals(schwabPosition.inTheMoney()));
+		}
 		return position;
 	}
 

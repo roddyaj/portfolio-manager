@@ -14,6 +14,9 @@ function Options(props) {
 		return null;
 	}
 
+	const calls = optionPositions.filter(p => p.symbol.endsWith("C"));
+	const puts = optionPositions.filter(p => p.symbol.endsWith("P"));
+
 	return (
 		<div className="pm-block">
 			<div className="pm-heading">
@@ -28,27 +31,33 @@ function Options(props) {
 						<th className="c">T</th>
 						<th className="c">Expiry</th>
 						<th>Strike</th>
+						<th>Price</th>
+						<th className="c">ITM</th>
 					</tr>
 				</thead>
 				<tbody>
-					{optionPositions.map(renderRow)}
+					{calls.map(renderRow)}
+					{puts.map(renderRow)}
 				</tbody>
 			</table>
 		</div>
 	);
 }
 
-function renderRow(position) {
+function renderRow(position, i) {
 	const [symbol, expiry, strike, type] = position.symbol.split(" ");
+	const rowStyle = i === 0 && type === "P" ? { borderTop: "1px solid grey" } : null;
 	return (
-		<tr key={position.symbol}>
+		<tr key={position.symbol} style={rowStyle}>
 			<td className="l">
 				<a href={`https://finance.yahoo.com/quote/${symbol}`}>{symbol}</a>
 			</td>
 			<td>{Math.abs(position.quantity)}</td>
-			<td>{type}</td>
-			<td>{expiry}</td>
+			<td className="c">{type}</td>
+			<td className="c">{expiry}</td>
 			<td>{strike}</td>
+			<td>{position.underlyingPrice.toFixed(2)}</td>
+			<td className="c">{position.inTheMoney ? (<i className="bi bi-check" style={{ marginLeft: 6 }}></i>) : null}</td>
 		</tr>
 	);
 }
