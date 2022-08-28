@@ -56,7 +56,7 @@ function renderRow(position, i) {
 			<td className="c">{type}</td>
 			<td className="c">{expiry}</td>
 			<td>{strike}</td>
-			<td>{position.underlyingPrice.toFixed(2)}</td>
+			<td>{position.underlyingPrice ? position.underlyingPrice.toFixed(2) : ""}</td>
 			<td className="c">{position.inTheMoney ? (<i className="bi bi-check" style={{ marginLeft: 6 }}></i>) : null}</td>
 		</tr>
 	);
