@@ -15,6 +15,8 @@ public class Output
 
 	private List<Position> positions;
 
+	private List<MonthlyIncome> income;
+
 	public String getAccountName()
 	{
 		return accountName;
@@ -65,5 +67,15 @@ public class Output
 	public void setPositions(List<Position> positions)
 	{
 		this.positions = positions;
+	}
+
+	public List<MonthlyIncome> getIncome()
+	{
+		return income;
+	}
+
+	public void setIncome(List<MonthlyIncome> income)
+	{
+		this.income = income;
 	}
 }

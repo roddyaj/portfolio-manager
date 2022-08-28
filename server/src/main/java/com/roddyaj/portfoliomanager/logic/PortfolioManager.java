@@ -1,14 +1,20 @@
 package com.roddyaj.portfoliomanager.logic;
 
 import java.nio.file.Path;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.roddyaj.portfoliomanager.model.Message;
 import com.roddyaj.portfoliomanager.model.Portfolio;
+import com.roddyaj.portfoliomanager.output.MonthlyIncome;
 import com.roddyaj.portfoliomanager.output.Order;
 import com.roddyaj.portfoliomanager.output.Output;
 import com.roddyaj.portfoliomanager.output.Position;
@@ -120,6 +126,9 @@ public final class PortfolioManager
 
 				output.getPositions().add(position);
 			}
+
+			if (transactions != null)
+				output.setIncome(calculateIncome(transactions.transactions()));
 		}
 
 		return output;
@@ -174,6 +183,51 @@ public final class PortfolioManager
 			availableCalls = (int)Math.floor(availableShares / 100.0);
 		}
 		return availableCalls;
+	}
+
+	private static List<MonthlyIncome> calculateIncome(List<? extends SchwabTransaction> transactions)
+	{
+		List<MonthlyIncome> monthlyIncome = new ArrayList<>();
+
+		final DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyy/MM");
+		Map<String, Double> monthToOptionsIncome = new HashMap<>();
+		Map<String, Double> monthToDividendIncome = new HashMap<>();
+		Map<String, Double> monthToContributions = new HashMap<>();
+		Set<String> shortOptionActions = Set.of("Sell to Open", "Buy to Close");
+		Set<String> transferActions = Set.of("Journal", "MoneyLink Deposit", "MoneyLink Transfer", "Funds Received", "Bank Transfer");
+		for (SchwabTransaction transaction : transactions)
+		{
+			String action = transaction.action();
+			if (action != null)
+			{
+				String dateString = transaction.date().format(format);
+				if (shortOptionActions.contains(action))
+					monthToOptionsIncome.merge(dateString, transaction.amount(), Double::sum);
+				else if (action.contains(" Div"))
+					monthToDividendIncome.merge(dateString, transaction.amount(), Double::sum);
+				else if (transferActions.contains(action))
+					monthToContributions.merge(dateString, transaction.amount(), Double::sum);
+			}
+		}
+
+		Set<String> allMonths = new HashSet<>();
+		allMonths.addAll(monthToOptionsIncome.keySet());
+		allMonths.addAll(monthToDividendIncome.keySet());
+		allMonths.addAll(monthToContributions.keySet());
+		List<String> sortedMonths = new ArrayList<>(allMonths);
+		Collections.sort(sortedMonths, Collections.reverseOrder());
+		for (String month : sortedMonths)
+		{
+			monthlyIncome.add(new MonthlyIncome(month, monthToOptionsIncome.getOrDefault(month, 0.), monthToDividendIncome.getOrDefault(month, 0.),
+				monthToContributions.getOrDefault(month, 0.)));
+		}
+
+		double optionsTotal = monthToOptionsIncome.values().stream().mapToDouble(Double::doubleValue).sum();
+		double dividendTotal = monthToDividendIncome.values().stream().mapToDouble(Double::doubleValue).sum();
+		double contributionsTotal = monthToContributions.values().stream().mapToDouble(Double::doubleValue).sum();
+		monthlyIncome.add(new MonthlyIncome("Total", optionsTotal, dividendTotal, contributionsTotal));
+
+		return monthlyIncome;
 	}
 
 	private static int round(double value, double cutoff)
