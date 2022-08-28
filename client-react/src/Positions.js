@@ -45,7 +45,7 @@ function Positions(props) {
 						{showAllPositions && <th>Target</th>}
 						{mode !== "calls" && <th>Ratio</th>}
 						{mode === "shares" && <th className="c">Trade</th>}
-						{mode === "shares" && <th></th>}
+						{mode !== "calls" && <th className="c">{mode === "view" ? "Open" : ""}</th>}
 						{mode === "calls" && <th className="c">Sell Calls</th>}
 						<th></th>
 					</tr>
@@ -87,11 +87,11 @@ function renderRow(position, mode) {
 			{showAllPositions && <td>{position.marketValue.toFixed(2)}</td>}
 			<td style={{ color: position.dayChangePct >= 0 ? "green" : "#C00" }}>{Math.abs(position.dayChangePct).toFixed(2) + "%"}</td>
 			<td style={{ color: position.gainLossPct >= 0 ? "green" : "#C00" }}>{Math.abs(position.gainLossPct).toFixed(2) + "%"}</td>
-			{showAllPositions && <td>{position.percentOfAccount.toFixed(2) + "%"}</td>}
+			{showAllPositions && <td>{position.percentOfAccount ? position.percentOfAccount.toFixed(2) + "%" : ""}</td>}
 			{showAllPositions && <td>{position.targetPct ? position.targetPct.toFixed(2) + "%" : ""}</td>}
-			{mode !== "calls" && <td>{position.targetPct ? (100 * position.percentOfAccount / position.targetPct).toFixed(1) + "%" : ""}</td>}
+			{mode !== "calls" && <td>{position.percentOfAccount && position.targetPct ? (100 * position.percentOfAccount / position.targetPct).toFixed(1) + "%" : ""}</td>}
 			{mode === "shares" && <td className="c"><a href={actionUrl}><button style={{ minWidth: 55 }} onClick={() => copyClip(Math.abs(position.sharesToBuy))}>{actionText}</button></a></td>}
-			{mode === "shares" && <td className="c"><a href={schwabOpenOrdersUrl}>{openOrderText}</a></td>}
+			{mode !== "calls" && <td className="c"><a href={schwabOpenOrdersUrl}>{openOrderText}</a></td>}
 			{mode === "calls" && <td className="c"><a href={optionChainUrl}><button>Sell {position.callsToSell}</button></a></td>}
 			<OverlayTrigger trigger={['hover', 'focus']} placement="right" overlay={renderPositionPopup(position)}>
 				<td><i className="bi bi-info-circle" style={{ marginLeft: 6 }}></i></td>

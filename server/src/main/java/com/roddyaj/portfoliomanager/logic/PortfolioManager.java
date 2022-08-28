@@ -85,14 +85,18 @@ public final class PortfolioManager
 			output.setBalance(positions.balance());
 			output.setCash(positions.cash());
 			output.setPositionsTime(positions.time().toEpochSecond() * 1000);
-			for (SchwabPosition schwabPosition : positions.positions())
+
+			List<Position> allPositions = new ArrayList<>();
+			allPositions.addAll(positions.positions().stream().map(PortfolioManager::toPosition).toList());
+			allPositions.addAll(getNewPositions(positions.positions(), orders, allocationMap));
+			for (Position position : allPositions)
 			{
-				Position position = toPosition(schwabPosition);
-				Double target = allocationMap.getAllocation(schwabPosition.symbol());
+				String symbol = position.getSymbol();
+				Double target = allocationMap.getAllocation(symbol);
 				position.setTargetPct(target != null ? (target.doubleValue() * 100) : null);
 				position.setSharesToBuy(calculateSharesToBuy(position, accountSettings, positions.balance(), target));
 
-				for (SchwabTransaction schwabTransaction : symbolToTransactions.getOrDefault(schwabPosition.symbol(), List.of()))
+				for (SchwabTransaction schwabTransaction : symbolToTransactions.getOrDefault(symbol, List.of()))
 				{
 					Transaction transaction = new Transaction();
 					transaction.setDate(schwabTransaction.date().toString());
@@ -104,7 +108,7 @@ public final class PortfolioManager
 					position.addTransaction(transaction);
 				}
 
-				for (SchwabOrder schwabOrder : symbolToOrders.getOrDefault(schwabPosition.symbol(), List.of()))
+				for (SchwabOrder schwabOrder : symbolToOrders.getOrDefault(symbol, List.of()))
 				{
 					Order order = new Order();
 					order.setAction(schwabOrder.action());
@@ -116,7 +120,7 @@ public final class PortfolioManager
 					position.addOpenOrder(order);
 				}
 
-				for (SchwabPosition schwabOption : symbolToOptions.getOrDefault(schwabPosition.symbol(), List.of()))
+				for (SchwabPosition schwabOption : symbolToOptions.getOrDefault(symbol, List.of()))
 				{
 					Position option = toPosition(schwabOption);
 					position.addOption(option);
@@ -132,6 +136,30 @@ public final class PortfolioManager
 		}
 
 		return output;
+	}
+
+	private static List<Position> getNewPositions(List<? extends SchwabPosition> positions, SchwabOrdersData orders, AllocationMap allocationMap)
+	{
+		List<Position> newPositions = new ArrayList<>();
+
+		Set<String> positionSymbols = positions.stream().map(SchwabPosition::symbol).collect(Collectors.toSet());
+		Set<String> buySymbols = orders != null
+			? orders.getOpenOrders().stream().filter(o -> "Buy".equals(o.action())).map(SchwabOrder::symbol).collect(Collectors.toSet())
+			: Set.of();
+		Set<String> newSymbols = new HashSet<>();
+		newSymbols.addAll(allocationMap.getSymbols());
+		newSymbols.addAll(buySymbols);
+		newSymbols.removeAll(positionSymbols);
+
+		for (String symbol : newSymbols)
+		{
+			Position position = new Position();
+			position.setSymbol(symbol);
+			position.setPrice(1);
+			newPositions.add(position);
+		}
+
+		return newPositions;
 	}
 
 	private static Position toPosition(SchwabPosition schwabPosition)

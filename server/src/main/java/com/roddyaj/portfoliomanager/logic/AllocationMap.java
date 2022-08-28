@@ -81,6 +81,11 @@ public class AllocationMap
 		return allocationMap.get(symbol);
 	}
 
+	public Set<String> getSymbols()
+	{
+		return allocationMap.keySet().stream().filter(s -> s.toUpperCase().equals(s)).collect(Collectors.toSet());
+	}
+
 	private static double getTotalAllocation(String category, Map<String, Double> map)
 	{
 		double allocation = 1;
