@@ -1,6 +1,7 @@
 package com.roddyaj.portfoliomanager.logic;
 
 import java.nio.file.Path;
+import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -14,6 +15,8 @@ import java.util.stream.Stream;
 
 import com.roddyaj.portfoliomanager.model.Message;
 import com.roddyaj.portfoliomanager.model.Portfolio;
+import com.roddyaj.portfoliomanager.model.Quote;
+import com.roddyaj.portfoliomanager.model.State;
 import com.roddyaj.portfoliomanager.output.MonthlyIncome;
 import com.roddyaj.portfoliomanager.output.Order;
 import com.roddyaj.portfoliomanager.output.Output;
@@ -79,6 +82,9 @@ public final class PortfolioManager
 		SchwabPositionsData positions = portfolio.getPositions();
 		if (positions != null)
 		{
+			State state = State.getInstance();
+			Instant portfolioTime = positions.time().toInstant();
+
 			Map<String, List<SchwabPosition>> symbolToOptions = positions.positions().stream().filter(SchwabPosition::isOption)
 				.collect(Collectors.groupingBy(p -> p.symbol().split(" ")[0]));
 
@@ -92,40 +98,25 @@ public final class PortfolioManager
 			for (Position position : allPositions)
 			{
 				String symbol = position.getSymbol();
+				position.setTransactions(symbolToTransactions.getOrDefault(symbol, List.of()).stream().map(PortfolioManager::toTransaction).toList());
+				position.setOpenOrders(symbolToOrders.getOrDefault(symbol, List.of()).stream().map(PortfolioManager::toOrder).toList());
+				position.setOptions(symbolToOptions.getOrDefault(symbol, List.of()).stream().map(PortfolioManager::toPosition).toList());
+
+				Quote quote = state.getQuote(symbol);
+				if (quote != null && quote.time().isAfter(portfolioTime))
+				{
+					double marketValue = quote.price() * position.getQuantity();
+					double gainLossPct = position.getCostBasis() > 0 ? (marketValue / position.getCostBasis() - 1) * 100 : 0;
+					position.setPrice(quote.price());
+					position.setMarketValue(marketValue);
+					position.setDayChangePct(quote.changePct());
+					position.setGainLossPct(gainLossPct);
+//					position.setPercentOfAccount();
+				}
+
 				Double target = allocationMap.getAllocation(symbol);
 				position.setTargetPct(target != null ? (target.doubleValue() * 100) : null);
 				position.setSharesToBuy(calculateSharesToBuy(position, accountSettings, positions.balance(), target));
-
-				for (SchwabTransaction schwabTransaction : symbolToTransactions.getOrDefault(symbol, List.of()))
-				{
-					Transaction transaction = new Transaction();
-					transaction.setDate(schwabTransaction.date().toString());
-					transaction.setAction(schwabTransaction.action());
-					transaction.setQuantity(schwabTransaction.quantity().doubleValue());
-					transaction.setPrice(schwabTransaction.price().doubleValue());
-					transaction.setAmount(schwabTransaction.amount().doubleValue());
-
-					position.addTransaction(transaction);
-				}
-
-				for (SchwabOrder schwabOrder : symbolToOrders.getOrDefault(symbol, List.of()))
-				{
-					Order order = new Order();
-					order.setAction(schwabOrder.action());
-					order.setQuantity(schwabOrder.quantity());
-					order.setOrderType(schwabOrder.orderType());
-					order.setLimitPrice(schwabOrder.limitPrice());
-					order.setTiming(schwabOrder.timing().toString());
-
-					position.addOpenOrder(order);
-				}
-
-				for (SchwabPosition schwabOption : symbolToOptions.getOrDefault(symbol, List.of()))
-				{
-					Position option = toPosition(schwabOption);
-					position.addOption(option);
-				}
-
 				position.setCallsToSell(calculateCallsToSell(position, settings, accountSettings));
 
 				output.getPositions().add(position);
@@ -133,33 +124,13 @@ public final class PortfolioManager
 
 			if (transactions != null)
 				output.setIncome(calculateIncome(transactions.transactions()));
+
+			List<String> allSymbols = allPositions.stream().filter(p -> !p.isOption()).map(Position::getSymbol).toList();
+			state.setSymbolsToLookup(allSymbols);
+			state.setLastRefresh(Instant.now());
 		}
 
 		return output;
-	}
-
-	private static List<Position> getNewPositions(List<? extends SchwabPosition> positions, SchwabOrdersData orders, AllocationMap allocationMap)
-	{
-		List<Position> newPositions = new ArrayList<>();
-
-		Set<String> positionSymbols = positions.stream().map(SchwabPosition::symbol).collect(Collectors.toSet());
-		Set<String> buySymbols = orders != null
-			? orders.getOpenOrders().stream().filter(o -> "Buy".equals(o.action())).map(SchwabOrder::symbol).collect(Collectors.toSet())
-			: Set.of();
-		Set<String> newSymbols = new HashSet<>();
-		newSymbols.addAll(allocationMap.getSymbols());
-		newSymbols.addAll(buySymbols);
-		newSymbols.removeAll(positionSymbols);
-
-		for (String symbol : newSymbols)
-		{
-			Position position = new Position();
-			position.setSymbol(symbol);
-			position.setPrice(1);
-			newPositions.add(position);
-		}
-
-		return newPositions;
 	}
 
 	private static Position toPosition(SchwabPosition schwabPosition)
@@ -187,6 +158,52 @@ public final class PortfolioManager
 			position.setInTheMoney("ITM".equals(schwabPosition.inTheMoney()));
 		}
 		return position;
+	}
+
+	private static Transaction toTransaction(SchwabTransaction schwabTransaction)
+	{
+		Transaction transaction = new Transaction();
+		transaction.setDate(schwabTransaction.date().toString());
+		transaction.setAction(schwabTransaction.action());
+		transaction.setQuantity(schwabTransaction.quantity().doubleValue());
+		transaction.setPrice(schwabTransaction.price().doubleValue());
+		transaction.setAmount(schwabTransaction.amount().doubleValue());
+		return transaction;
+	}
+
+	private static Order toOrder(SchwabOrder schwabOrder)
+	{
+		Order order = new Order();
+		order.setAction(schwabOrder.action());
+		order.setQuantity(schwabOrder.quantity());
+		order.setOrderType(schwabOrder.orderType());
+		order.setLimitPrice(schwabOrder.limitPrice());
+		order.setTiming(schwabOrder.timing().toString());
+		return order;
+	}
+
+	private static List<Position> getNewPositions(List<? extends SchwabPosition> positions, SchwabOrdersData orders, AllocationMap allocationMap)
+	{
+		List<Position> newPositions = new ArrayList<>();
+
+		Set<String> positionSymbols = positions.stream().map(SchwabPosition::symbol).collect(Collectors.toSet());
+		Set<String> buySymbols = orders != null
+			? orders.getOpenOrders().stream().filter(o -> "Buy".equals(o.action())).map(SchwabOrder::symbol).collect(Collectors.toSet())
+			: Set.of();
+		Set<String> newSymbols = new HashSet<>();
+		newSymbols.addAll(allocationMap.getSymbols());
+		newSymbols.addAll(buySymbols);
+		newSymbols.removeAll(positionSymbols);
+
+		for (String symbol : newSymbols)
+		{
+			Position position = new Position();
+			position.setSymbol(symbol);
+			position.setPrice(1);
+			newPositions.add(position);
+		}
+
+		return newPositions;
 	}
 
 	private static Integer calculateSharesToBuy(Position position, AccountSettings accountSettings, double accountBalance, Double target)

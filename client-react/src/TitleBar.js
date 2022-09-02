@@ -4,6 +4,7 @@ function TitleBar(props) {
 	const accountOptions = accounts.map((account) => {
 		return (<option key={account} value={account}>{account}</option>);
 	});
+	const currencyOptions = { style: "currency", currency: "USD" };
 
 	return (
 		<div className="pm-block">
@@ -19,8 +20,8 @@ function TitleBar(props) {
 				{
 					portfolio && (
 						<div>
-							<span style={{ marginLeft: 24 }}>Balance: {portfolio.balance.toLocaleString()}</span>
-							<span style={{ marginLeft: 12 }}>Cash: {portfolio.cash.toLocaleString()}</span>
+							<span style={{ marginLeft: 24 }}>Cash: {portfolio.cash.toLocaleString("en-US", currencyOptions)}</span>
+							<span style={{ marginLeft: 12 }}>Balance: {portfolio.balance.toLocaleString("en-US", currencyOptions)}</span>
 							<span style={{ marginLeft: 24 }}>{new Date(portfolio.positionsTime).toLocaleString()}</span>
 						</div>
 					)
