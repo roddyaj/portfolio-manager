@@ -1,12 +1,10 @@
 package com.roddyaj.portfoliomanager.services;
 
 import java.io.IOException;
-import java.util.stream.Stream;
 
 import com.roddyaj.portfoliomanager.logic.PortfolioManager;
 import com.roddyaj.portfoliomanager.model.State;
 import com.roddyaj.portfoliomanager.output.Output;
-import com.roddyaj.portfoliomanager.settings.AccountSettings;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
