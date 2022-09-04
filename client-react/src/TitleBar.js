@@ -1,5 +1,5 @@
 function TitleBar(props) {
-	const { accounts, selectedAccount, setSelectedAccount, portfolio, requestPortfolio } = props;
+	const { accounts, selectedAccount, setSelectedAccount, portfolio, requestPortfolio, stopPolling } = props;
 
 	const accountOptions = accounts.map((account) => {
 		return (<option key={account} value={account}>{account}</option>);
@@ -15,7 +15,8 @@ function TitleBar(props) {
 					</select>
 				</div>
 
-				<button type="button" style={{ marginLeft: 12 }} onClick={() => requestPortfolio(selectedAccount)}>Refresh</button>
+				<button type="button" style={{ marginLeft: 12 }} onClick={() => requestPortfolio(selectedAccount)}><i className="bi bi-arrow-clockwise"></i></button>
+				<button type="button" style={{ marginLeft: 6 }} onClick={() => stopPolling()}><i className="bi bi-stop-fill"></i></button>
 
 				{
 					portfolio && (

@@ -39,6 +39,14 @@ function App() {
 		request().then(setPortfolio);
 	}
 
+	function stopPolling() {
+		const request = async () => {
+			const response = await fetch("http://localhost:8090/stop-poll");
+			return await response.json();
+		};
+		request();
+	}
+
 	return (
 		<div>
 			<TitleBar
@@ -47,6 +55,7 @@ function App() {
 				setSelectedAccount={setSelectedAccount}
 				portfolio={portfolio}
 				requestPortfolio={requestPortfolio}
+				stopPolling={stopPolling}
 			/>
 			{
 				portfolio ? (

@@ -103,7 +103,7 @@ public final class PortfolioManager
 				position.setOptions(symbolToOptions.getOrDefault(symbol, List.of()).stream().map(PortfolioManager::toPosition).toList());
 
 				Quote quote = state.getQuote(symbol);
-				if (quote != null && quote.time().isAfter(portfolioTime))
+				if (quote != null && (quote.time().isAfter(portfolioTime) || position.getPrice() == 0))
 				{
 					double marketValue = quote.price() * position.getQuantity();
 					double gainLossPct = position.getCostBasis() > 0 ? (marketValue / position.getCostBasis() - 1) * 100 : 0;

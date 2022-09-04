@@ -14,6 +14,7 @@ import com.roddyaj.portfoliomanager.api.FinnhubAPI;
 import com.roddyaj.portfoliomanager.model.Quote;
 import com.roddyaj.portfoliomanager.model.State;
 import com.roddyaj.portfoliomanager.services.AccountsServlet;
+import com.roddyaj.portfoliomanager.services.ApplicationServlet;
 import com.roddyaj.portfoliomanager.services.PortfolioServlet;
 import com.roddyaj.portfoliomanager.settings.Api;
 import com.roddyaj.portfoliomanager.settings.Settings;
@@ -48,6 +49,7 @@ public class Main
 		ServletHandler servletHandler = new ServletHandler();
 		servletHandler.addServletWithMapping(AccountsServlet.class, "/accounts");
 		servletHandler.addServletWithMapping(PortfolioServlet.class, "/portfolio");
+		servletHandler.addServletWithMapping(ApplicationServlet.class, "/stop-poll");
 		server.setHandler(servletHandler);
 
 		server.start();
@@ -88,6 +90,9 @@ public class Main
 					{
 						e.printStackTrace();
 					}
+
+					if (state.getLastRefresh() == null)
+						break;
 				}
 			}
 
