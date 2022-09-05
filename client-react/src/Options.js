@@ -33,6 +33,7 @@ function Options(props) {
 						<th>Strike</th>
 						<th>Price</th>
 						<th className="c">ITM</th>
+						<th>Prem.</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -54,10 +55,11 @@ function renderRow(position, i) {
 			</td>
 			<td>{Math.abs(position.quantity)}</td>
 			<td className="c">{type}</td>
-			<td className="c">{expiry}</td>
+			<td className="l">{expiry} ({position.dte})</td>
 			<td>{strike}</td>
 			<td>{position.underlyingPrice ? position.underlyingPrice.toFixed(2) : ""}</td>
 			<td className="c">{position.inTheMoney ? (<i className="bi bi-check" style={{ marginLeft: 6 }}></i>) : null}</td>
+			<td>{Math.abs(position.costBasis)}</td>
 		</tr>
 	);
 }

@@ -33,8 +33,10 @@ public class Position
 //	Integer volume;
 	private Double underlyingPrice;
 	private Boolean inTheMoney;
+	private Integer dte;
 //	String securityType;
 
+	private String logo;
 	private Double targetPct;
 	private Integer sharesToBuy;
 	private Integer callsToSell;
@@ -193,9 +195,29 @@ public class Position
 		this.inTheMoney = inTheMoney;
 	}
 
+	public Integer getDte()
+	{
+		return dte;
+	}
+
+	public void setDte(Integer dte)
+	{
+		this.dte = dte;
+	}
+
 	public boolean isOption()
 	{
 		return symbol.indexOf(' ') != -1;
+	}
+
+	public String getLogo()
+	{
+		return logo;
+	}
+
+	public void setLogo(String logo)
+	{
+		this.logo = logo;
 	}
 
 	public Double getTargetPct()

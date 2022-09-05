@@ -85,6 +85,10 @@ public class Main
 						Quote quote = finnhub.getQuote(symbol);
 						if (quote != null)
 							state.setQuote(symbol, quote);
+
+//						JsonNode companyInfo = finnhub.getCompanyProfile2(symbol);
+//						if (companyInfo != null)
+//							state.setCompanyInfo(symbol, companyInfo);
 					}
 					catch (IOException e)
 					{

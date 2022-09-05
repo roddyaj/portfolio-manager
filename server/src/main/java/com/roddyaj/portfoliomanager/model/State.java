@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.roddyaj.portfoliomanager.settings.Settings;
 
@@ -27,6 +28,8 @@ public final class State
 	private Collection<String> symbolsToLookup;
 
 	private final Map<String, Quote> quotes = new ConcurrentHashMap<>();
+
+	private final Map<String, JsonNode> companyInfo = new ConcurrentHashMap<>();
 
 	public Path getInputDir()
 	{
@@ -76,6 +79,16 @@ public final class State
 	public void setQuote(String symbol, Quote quote)
 	{
 		quotes.put(symbol, quote);
+	}
+
+	public JsonNode getCompanyInfo(String symbol)
+	{
+		return companyInfo.get(symbol);
+	}
+
+	public void setCompanyInfo(String symbol, JsonNode info)
+	{
+		companyInfo.put(symbol, info);
 	}
 
 	private State()

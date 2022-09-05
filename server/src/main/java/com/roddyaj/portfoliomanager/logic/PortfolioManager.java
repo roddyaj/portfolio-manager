@@ -15,6 +15,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.roddyaj.portfoliomanager.model.Message;
 import com.roddyaj.portfoliomanager.model.Portfolio;
 import com.roddyaj.portfoliomanager.model.Quote;
@@ -42,6 +43,7 @@ public final class PortfolioManager
 	private static final Set<String> shortOptionActions = Set.of("Sell to Open", "Buy to Close");
 	private static final Set<String> transferActions = Set.of("Journal", "MoneyLink Deposit", "MoneyLink Transfer", "Funds Received",
 		"Bank Transfer");
+	private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("M/d/yyyy");
 
 	public Output process(Path inputDir, String accountName, Settings settings)
 	{
@@ -122,6 +124,12 @@ public final class PortfolioManager
 //					position.setPercentOfAccount();
 				}
 
+				JsonNode companyInfo = state.getCompanyInfo(symbol);
+				if (companyInfo != null)
+				{
+					position.setLogo(companyInfo.get("logo").textValue());
+				}
+
 				Double target = allocationMap.getAllocation(symbol);
 				position.setTargetPct(target != null ? (target.doubleValue() * 100) : null);
 				position.setSharesToBuy(calculateSharesToBuy(position, accountSettings, positions.balance(), target));
@@ -161,10 +169,12 @@ public final class PortfolioManager
 		if (schwabPosition.intrinsicValue() != null)
 		{
 			String[] tokens = schwabPosition.symbol().split(" ");
+			LocalDate expiryDate = LocalDate.parse(tokens[1], DATE_FORMAT);
 			double strike = Double.parseDouble(tokens[2]);
 			String type = tokens[3];
 			position.setUnderlyingPrice(type.equals("P") ? strike - schwabPosition.intrinsicValue() : strike + schwabPosition.intrinsicValue());
 			position.setInTheMoney("ITM".equals(schwabPosition.inTheMoney()));
+			position.setDte((int)ChronoUnit.DAYS.between(LocalDate.now(), expiryDate));
 		}
 		return position;
 	}
