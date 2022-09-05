@@ -2,7 +2,9 @@ package com.roddyaj.portfoliomanager.logic;
 
 import java.nio.file.Path;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -37,6 +39,10 @@ import com.roddyaj.schwabparse.SchwabTransactionsData;
 
 public final class PortfolioManager
 {
+	private static final Set<String> shortOptionActions = Set.of("Sell to Open", "Buy to Close");
+	private static final Set<String> transferActions = Set.of("Journal", "MoneyLink Deposit", "MoneyLink Transfer", "Funds Received",
+		"Bank Transfer");
+
 	public Output process(Path inputDir, String accountName, Settings settings)
 	{
 		String accountNumber = Stream.of(settings.getAccounts()).filter(a -> a.getName().equals(accountName)).map(AccountSettings::getAccountNumber)
@@ -79,10 +85,11 @@ public final class PortfolioManager
 		List<Message> messages = new ArrayList<>();
 		AllocationMap allocationMap = new AllocationMap(accountSettings.getAllocations(), messages);
 
+		State state = State.getInstance();
+
 		SchwabPositionsData positions = portfolio.getPositions();
 		if (positions != null)
 		{
-			State state = State.getInstance();
 			Instant portfolioTime = positions.time().toInstant();
 
 			Map<String, List<SchwabPosition>> symbolToOptions = positions.positions().stream().filter(SchwabPosition::isOption)
@@ -90,6 +97,7 @@ public final class PortfolioManager
 
 			output.setBalance(positions.balance());
 			output.setCash(positions.cash());
+			output.setPortfolioReturn(calculateReturn(accountSettings, portfolio));
 			output.setPositionsTime(positions.time().toEpochSecond() * 1000);
 
 			List<Position> allPositions = new ArrayList<>();
@@ -122,13 +130,14 @@ public final class PortfolioManager
 				output.getPositions().add(position);
 			}
 
-			if (transactions != null)
-				output.setIncome(calculateIncome(transactions.transactions()));
-
 			List<String> allSymbols = allPositions.stream().filter(p -> !p.isOption()).map(Position::getSymbol).toList();
 			state.setSymbolsToLookup(allSymbols);
-			state.setLastRefresh(Instant.now());
 		}
+
+		if (transactions != null)
+			output.setIncome(calculateIncome(transactions.transactions()));
+
+		state.setLastRefresh(Instant.now());
 
 		return output;
 	}
@@ -246,8 +255,6 @@ public final class PortfolioManager
 		Map<String, Double> monthToOptionsIncome = new HashMap<>();
 		Map<String, Double> monthToDividendIncome = new HashMap<>();
 		Map<String, Double> monthToContributions = new HashMap<>();
-		Set<String> shortOptionActions = Set.of("Sell to Open", "Buy to Close");
-		Set<String> transferActions = Set.of("Journal", "MoneyLink Deposit", "MoneyLink Transfer", "Funds Received", "Bank Transfer");
 		for (SchwabTransaction transaction : transactions)
 		{
 			String action = transaction.action();
@@ -281,6 +288,28 @@ public final class PortfolioManager
 		monthlyIncome.add(new MonthlyIncome("Total", optionsTotal, dividendTotal, contributionsTotal));
 
 		return monthlyIncome;
+	}
+
+	private static double calculateReturn(AccountSettings accountSettings, Portfolio portfolio)
+	{
+		final LocalDate startDate = LocalDate.of(2022, 1, 1);
+
+		double A = accountSettings.getStartingBalance();
+		double B = portfolio.getPositions().balance();
+		List<SchwabTransaction> transfers = portfolio.getTransactions().transactions().stream()
+			.filter(t -> transferActions.contains(t.action()) && !t.date().isBefore(startDate)).toList();
+		double F = transfers.stream().mapToDouble(SchwabTransaction::amount).sum();
+		double weightedF = transfers.stream().mapToDouble(t -> getWeight(t, startDate) * t.amount()).sum();
+		double R = (B - A - F) / (A + weightedF);
+		return R;
+	}
+
+	private static double getWeight(SchwabTransaction transaction, LocalDate startDate)
+	{
+		long C = 365;
+		long D = ChronoUnit.DAYS.between(startDate, transaction.date());
+		double W = D >= 0 ? (C - D) / (double)C : 0;
+		return W;
 	}
 
 	private static int round(double value, double cutoff)

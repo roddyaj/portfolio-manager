@@ -11,6 +11,8 @@ public class Output
 
 	private double cash;
 
+	private double portfolioReturn;
+
 	private long positionsTime;
 
 	private List<Position> positions;
@@ -45,6 +47,16 @@ public class Output
 	public void setCash(double cash)
 	{
 		this.cash = cash;
+	}
+
+	public double getPortfolioReturn()
+	{
+		return portfolioReturn;
+	}
+
+	public void setPortfolioReturn(double portfolioReturn)
+	{
+		this.portfolioReturn = portfolioReturn;
 	}
 
 	public long getPositionsTime()

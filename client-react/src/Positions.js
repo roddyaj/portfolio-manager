@@ -85,8 +85,8 @@ function renderRow(position, mode) {
 			{showAllPositions && <td>{position.quantity}</td>}
 			<td>{position.price.toFixed(2)}</td>
 			{showAllPositions && <td>{position.marketValue.toFixed(2)}</td>}
-			<td style={{ color: position.dayChangePct >= 0 ? "green" : "#C00" }}>{Math.abs(position.dayChangePct).toFixed(2) + "%"}</td>
-			<td style={{ color: position.gainLossPct >= 0 ? "green" : "#C00" }}>{Math.abs(position.gainLossPct).toFixed(2) + "%"}</td>
+			<td style={{ color: position.dayChangePct >= 0 ? "green" : "#C00" }}>{Math.abs(position.dayChangePct).toFixed(2)}%</td>
+			<td style={{ color: position.gainLossPct >= 0 ? "green" : "#C00" }}>{Math.abs(position.gainLossPct).toFixed(2)}%</td>
 			{showAllPositions && <td>{position.percentOfAccount ? position.percentOfAccount.toFixed(2) + "%" : ""}</td>}
 			{showAllPositions && <td>{position.targetPct ? position.targetPct.toFixed(2) + "%" : ""}</td>}
 			{mode !== "calls" && <td>{position.percentOfAccount && position.targetPct ? (100 * position.percentOfAccount / position.targetPct).toFixed(1) + "%" : ""}</td>}
