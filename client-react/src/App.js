@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import TitleBar from './TitleBar'
 import Positions from './Positions'
 import Options from './Options'
+import Cash from "./Cash";
 import Income from './Income'
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
@@ -68,6 +69,7 @@ function App() {
 							<Options portfolio={portfolio} isLong={true} />
 						</div>
 						<div className="pm-column">
+							<Cash portfolio={portfolio} />
 							<Income portfolio={portfolio} />
 						</div>
 					</div>

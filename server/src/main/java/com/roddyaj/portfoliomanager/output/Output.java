@@ -11,6 +11,10 @@ public class Output
 
 	private double cash;
 
+	private double cashOnHold;
+
+	private double cashAvailable;
+
 	private double portfolioReturn;
 
 	private long positionsTime;
@@ -47,6 +51,26 @@ public class Output
 	public void setCash(double cash)
 	{
 		this.cash = cash;
+	}
+
+	public double getCashOnHold()
+	{
+		return cashOnHold;
+	}
+
+	public void setCashOnHold(double cashOnHold)
+	{
+		this.cashOnHold = cashOnHold;
+	}
+
+	public double getCashAvailable()
+	{
+		return cashAvailable;
+	}
+
+	public void setCashAvailable(double cashAvailable)
+	{
+		this.cashAvailable = cashAvailable;
 	}
 
 	public double getPortfolioReturn()

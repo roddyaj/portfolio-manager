@@ -6,6 +6,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -137,6 +138,9 @@ public final class PortfolioManager
 
 				output.getPositions().add(position);
 			}
+
+			output.setCashOnHold(calculateCashOnHold(allPositions));
+			output.setCashAvailable(output.getCash() - output.getCashOnHold());
 
 			List<String> allSymbols = allPositions.stream().filter(p -> !p.isOption()).map(Position::getSymbol).toList();
 			state.setSymbolsToLookup(allSymbols);
@@ -320,6 +324,12 @@ public final class PortfolioManager
 		long D = ChronoUnit.DAYS.between(startDate, transaction.date());
 		double W = D >= 0 ? (C - D) / (double)C : 0;
 		return W;
+	}
+
+	private static double calculateCashOnHold(Collection<? extends Position> positions)
+	{
+		return positions.stream().filter(p -> p.isOption() && p.getSymbol().endsWith("P") && p.getQuantity() < 0)
+			.mapToDouble(p -> Double.parseDouble(p.getSymbol().split(" ")[2]) * Math.abs(p.getQuantity())).sum() * 100;
 	}
 
 	private static int round(double value, double cutoff)
