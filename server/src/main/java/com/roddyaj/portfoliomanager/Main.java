@@ -27,7 +27,7 @@ public class Main
 		try
 		{
 			main.startServer();
-			main.startQuotePolling();
+//			main.startQuotePolling();
 		}
 		catch (Exception e)
 		{

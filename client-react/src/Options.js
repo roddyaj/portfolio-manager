@@ -1,66 +1,43 @@
-function Options(props) {
-	const { portfolio, isLong } = props;
+import DataTable from './DataTable'
 
-	const optionPositions = portfolio.positions
-		.filter(p => p.symbol.includes(" ") && ((!isLong && p.quantity < 0) || (isLong && p.quantity > 0)))
-		.sort((a, b) => {
-			const [symbolA, , , typeA] = a.symbol.split(" ");
-			const [symbolB, , , typeB] = b.symbol.split(" ");
-			const value = typeA.localeCompare(typeB);
-			return value === 0 ? symbolA.localeCompare(symbolB) : value;
-		});
+const columns = [
+	{
+		name: "Ticker",
+		align: "l",
+		getValue: p => p.symbol.split(" ")[0],
+		render: r => (<td key={r.key} className={r.column.align}><a href={`https://finance.yahoo.com/quote/${r.value}`}>{r.value}</a></td>)
+	},
+	{ name: "#", align: "r", getValue: p => Math.abs(p.quantity) },
+	{ name: "T", align: "c", getValue: p => p.symbol.split(" ")[3] },
+	{ name: "Expiry", align: "c", getValue: p => `${p.symbol.split(" ")[1]} (${p.dte})` },
+	{ name: "Strike", align: "r", getValue: p => Number(p.symbol.split(" ")[2]), render: r => r.value.toFixed(2) },
+	{ name: "Price", align: "r", getValue: p => p.underlyingPrice ? p.underlyingPrice : 0, render: r => r.value.toFixed(2) },
+	{
+		name: "ITM",
+		align: "c",
+		getValue: p => p.inTheMoney,
+		render: r => r.value ? (<td key={r.key} className={r.column.align}><i className="bi bi-check" style={{ marginLeft: 6 }}></i></td>) : null
+	},
+	{ name: "Prem.", align: "r", getValue: p => Math.abs(p.costBasis) }
+];
+
+function Options(props) {
+	const { positions, isLong, type } = props;
+
+	const optionPositions = positions.filter(p => p.symbol.includes(" ") && p.symbol.endsWith(type.charAt(0)) && ((!isLong && p.quantity < 0) || (isLong && p.quantity > 0)));
 
 	if (optionPositions.length === 0) {
 		return null;
 	}
 
-	const calls = optionPositions.filter(p => p.symbol.endsWith("C"));
-	const puts = optionPositions.filter(p => p.symbol.endsWith("P"));
-
 	return (
 		<div className="pm-block">
 			<div className="pm-heading">
-				<div className="pm-title">{`${isLong ? "Long" : "Short"} Options`}</div>
+				<div className="pm-title">{`${isLong ? "Long" : "Short"} ${type}`}</div>
 				<span style={{ marginLeft: 10 }}>({optionPositions.length})</span>
 			</div>
-			<table>
-				<thead>
-					<tr>
-						<th className="l">Ticker</th>
-						<th>#</th>
-						<th className="c">T</th>
-						<th className="c">Expiry</th>
-						<th>Strike</th>
-						<th>Price</th>
-						<th className="c">ITM</th>
-						<th>Prem.</th>
-					</tr>
-				</thead>
-				<tbody>
-					{calls.map(renderRow)}
-					{puts.map(renderRow)}
-				</tbody>
-			</table>
+			<DataTable columns={columns} records={optionPositions} />
 		</div>
-	);
-}
-
-function renderRow(position, i) {
-	const [symbol, expiry, strike, type] = position.symbol.split(" ");
-	const rowStyle = i === 0 && type === "P" ? { borderTop: "1px solid grey" } : null;
-	return (
-		<tr key={position.symbol} style={rowStyle}>
-			<td className="l">
-				<a href={`https://finance.yahoo.com/quote/${symbol}`}>{symbol}</a>
-			</td>
-			<td>{Math.abs(position.quantity)}</td>
-			<td className="c">{type}</td>
-			<td className="l">{expiry} ({position.dte})</td>
-			<td>{strike}</td>
-			<td>{position.underlyingPrice ? position.underlyingPrice.toFixed(2) : ""}</td>
-			<td className="c">{position.inTheMoney ? (<i className="bi bi-check" style={{ marginLeft: 6 }}></i>) : null}</td>
-			<td>{Math.abs(position.costBasis)}</td>
-		</tr>
 	);
 }
 
