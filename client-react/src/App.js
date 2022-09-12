@@ -4,6 +4,7 @@ import Positions from './Positions'
 import Options from './Options'
 import Cash from "./Cash";
 import Income from './Income'
+import PutsToSell from "./PutsToSell";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import './App.css';
@@ -65,6 +66,7 @@ function App() {
 							<Positions portfolio={portfolio} />
 						</div>
 						<div className="pm-column">
+							<PutsToSell portfolio={portfolio} />
 							<Options positions={portfolio.positions} isLong={false} type="Calls" />
 							<Options positions={portfolio.positions} isLong={false} type="Puts" />
 							<Options positions={portfolio.positions} isLong={true} type="Calls" />

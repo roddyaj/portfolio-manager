@@ -23,6 +23,8 @@ public class Output
 
 	private List<MonthlyIncome> income;
 
+	private List<PutToSell> putsToSell;
+
 	public String getAccountName()
 	{
 		return accountName;
@@ -113,5 +115,15 @@ public class Output
 	public void setIncome(List<MonthlyIncome> income)
 	{
 		this.income = income;
+	}
+
+	public List<PutToSell> getPutsToSell()
+	{
+		return putsToSell;
+	}
+
+	public void setPutsToSell(List<PutToSell> putsToSell)
+	{
+		this.putsToSell = putsToSell;
 	}
 }

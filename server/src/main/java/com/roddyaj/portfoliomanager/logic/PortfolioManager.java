@@ -13,6 +13,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -25,6 +26,7 @@ import com.roddyaj.portfoliomanager.output.MonthlyIncome;
 import com.roddyaj.portfoliomanager.output.Order;
 import com.roddyaj.portfoliomanager.output.Output;
 import com.roddyaj.portfoliomanager.output.Position;
+import com.roddyaj.portfoliomanager.output.PutToSell;
 import com.roddyaj.portfoliomanager.output.Transaction;
 import com.roddyaj.portfoliomanager.schwab.AbstractMonitor;
 import com.roddyaj.portfoliomanager.schwab.OrdersMonitor;
@@ -97,6 +99,8 @@ public final class PortfolioManager
 
 			Map<String, List<SchwabPosition>> symbolToOptions = positions.positions().stream().filter(SchwabPosition::isOption)
 				.collect(Collectors.groupingBy(p -> p.symbol().split(" ")[0]));
+			Map<String, SchwabPosition> symbolToPosition = positions.positions().stream().filter(p -> !p.isOption())
+				.collect(Collectors.toMap(SchwabPosition::symbol, Function.identity()));
 
 			output.setBalance(positions.balance());
 			output.setCash(positions.cash());
@@ -141,6 +145,10 @@ public final class PortfolioManager
 
 			output.setCashOnHold(calculateCashOnHold(allPositions));
 			output.setCashAvailable(output.getCash() - output.getCashOnHold());
+			output.setPutsToSell(Stream.of(settings.getOptionsInclude()).map(s -> {
+				return new PutToSell(s, symbolToPosition.containsKey(s) ? symbolToPosition.get(s).price() : null,
+					symbolToPosition.containsKey(s) ? symbolToPosition.get(s).dayChangePct() : null);
+			}).toList());
 
 			List<String> allSymbols = allPositions.stream().filter(p -> !p.isOption()).map(Position::getSymbol).toList();
 			state.setSymbolsToLookup(allSymbols);
