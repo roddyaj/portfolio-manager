@@ -1,4 +1,4 @@
-import DataTable from './DataTable'
+import DataTable from './DataTable';
 
 const columns = [
 	{

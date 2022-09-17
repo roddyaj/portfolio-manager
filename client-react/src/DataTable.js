@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 
 function DataTable(props) {
-	const { columns, records } = props;
+	const { columns, records, tableState } = props;
 
 	const [sortColumn, setSortColumn] = useState(null);
 	const [sortDirection, setSortDirection] = useState(-1);
@@ -27,7 +27,7 @@ function DataTable(props) {
 					</tr>
 				</thead>
 				<tbody>
-					{sortedRecords.map((record, i) => renderRow(record, i, columns))}
+					{sortedRecords.map((record, i) => renderRow(record, i, columns, tableState))}
 				</tbody>
 			</table>
 		</div>
@@ -43,21 +43,21 @@ function renderHeaderCell(column, colIndex, handleSort) {
 	);
 }
 
-function renderRow(record, rowIndex, columns) {
+function renderRow(record, rowIndex, columns, tableState) {
 	return (
 		<tr key={rowIndex}>
-			{columns.map((column, colIndex) => renderDataCell(record, rowIndex, column, colIndex))}
+			{columns.map((column, colIndex) => renderDataCell(record, rowIndex, column, colIndex, tableState))}
 		</tr>
 	);
 }
 
-function renderDataCell(record, rowIndex, column, colIndex) {
+function renderDataCell(record, rowIndex, column, colIndex, tableState) {
 	const key = `${column.name}-${colIndex}`;
 	const value = column.getValue(record);
 
 	let component = null;
 	if (column.render) {
-		const renderData = { record, rowIndex, column, colIndex, key, value };
+		const renderData = { record, rowIndex, column, colIndex, key, value, tableState };
 		component = column.render(renderData);
 	}
 	if (component === null || typeof component === "string") {

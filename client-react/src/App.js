@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import TitleBar from './TitleBar'
-import Positions from './Positions'
+import Positions2 from "./Positions2";
 import Options from './Options'
 import Cash from "./Cash";
 import Income from './Income'
@@ -63,7 +63,7 @@ function App() {
 				portfolio ? (
 					<div className="pm-row">
 						<div className="pm-column">
-							<Positions portfolio={portfolio} />
+							<Positions2 portfolio={portfolio} />
 						</div>
 						<div className="pm-column">
 							<PutsToSell portfolio={portfolio} />
