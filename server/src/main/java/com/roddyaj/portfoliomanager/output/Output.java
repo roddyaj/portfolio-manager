@@ -13,6 +13,8 @@ public class Output
 
 	private double cashOnHold;
 
+	private double openBuyAmount;
+
 	private double cashAvailable;
 
 	private double portfolioReturn;
@@ -63,6 +65,16 @@ public class Output
 	public void setCashOnHold(double cashOnHold)
 	{
 		this.cashOnHold = cashOnHold;
+	}
+
+	public double getOpenBuyAmount()
+	{
+		return openBuyAmount;
+	}
+
+	public void setOpenBuyAmount(double openBuyAmount)
+	{
+		this.openBuyAmount = openBuyAmount;
 	}
 
 	public double getCashAvailable()

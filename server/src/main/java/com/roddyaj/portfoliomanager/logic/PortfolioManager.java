@@ -144,7 +144,9 @@ public final class PortfolioManager
 			}
 
 			output.setCashOnHold(calculateCashOnHold(allPositions));
-			output.setCashAvailable(output.getCash() - output.getCashOnHold());
+			output.setOpenBuyAmount(calculateOpenBuyAmount(orders));
+			output.setCashAvailable(output.getCash() - output.getCashOnHold() - output.getOpenBuyAmount());
+
 			output.setPutsToSell(Stream.of(settings.getOptionsInclude()).map(s -> {
 				return new PutToSell(s, symbolToPosition.containsKey(s) ? symbolToPosition.get(s).price() : null,
 					symbolToPosition.containsKey(s) ? symbolToPosition.get(s).dayChangePct() : null);
@@ -338,6 +340,14 @@ public final class PortfolioManager
 	{
 		return positions.stream().filter(p -> p.isOption() && p.getSymbol().endsWith("P") && p.getQuantity() < 0)
 			.mapToDouble(p -> Double.parseDouble(p.getSymbol().split(" ")[2]) * Math.abs(p.getQuantity())).sum() * 100;
+	}
+
+	private static double calculateOpenBuyAmount(SchwabOrdersData orders)
+	{
+		return orders != null
+			? orders.getOpenOrders().stream().filter(o -> "Buy".equals(o.action()))
+				.mapToDouble(o -> o.limitPrice() != null ? o.quantity() * o.limitPrice() : 0).sum()
+			: 0;
 	}
 
 	private static int round(double value, double cutoff)

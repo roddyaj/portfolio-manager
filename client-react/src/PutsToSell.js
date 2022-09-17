@@ -7,7 +7,12 @@ const columns = [
 		getValue: p => p.symbol,
 		render: r => (<td key={r.key} className={r.column.align}><a href={`https://client.schwab.com/Areas/Trade/Options/Chains/Index.aspx#symbol/${r.value}`}>{r.value}</a></td>)
 	},
-	{ name: "Price", align: "r", getValue: p => p.price },
+	{
+		name: "Price",
+		align: "r",
+		getValue: p => p.price,
+		render: r => r.value ? r.value.toFixed(2) : null
+	},
 	{
 		name: "Day",
 		align: "r",

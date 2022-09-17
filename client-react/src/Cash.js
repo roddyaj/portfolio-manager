@@ -10,6 +10,7 @@ function Cash(props) {
 				<tbody>
 					<tr><td className="l">Cash</td><td>{portfolio.cash.toFixed(2)}</td></tr>
 					<tr><td className="l">Cash on hold</td><td>- {portfolio.cashOnHold.toFixed(2)}</td></tr>
+					<tr><td className="l">Open buys</td><td>- {portfolio.openBuyAmount.toFixed(2)}</td></tr>
 					<tr style={{ borderTop: "1px solid grey" }}><td className="l">Available cash</td><td>{portfolio.cashAvailable.toFixed(2)}</td></tr>
 				</tbody>
 			</table>
