@@ -12,9 +12,10 @@ const columns = [
 		getValue: p => p.symbol,
 		render: r => (
 			<td key={r.key} className={r.column.align}>
-				<a href={`https://client.schwab.com/SymbolRouting.aspx?Symbol=${r.value}`} style={r.record.peRatio < 0 ? { backgroundColor: "#FDD" } : {}}>{r.value}</a>
+				<a href={`https://client.schwab.com/SymbolRouting.aspx?Symbol=${r.value}`} style={r.record.peRatio < 0 ? { backgroundColor: "#FDD" } : null}>{r.value}</a>
 			</td>
-		)
+		),
+		sortDirection: 1
 	},
 	{
 		name: "",
@@ -28,7 +29,7 @@ const columns = [
 			</td>
 		)
 	},
-	{ name: "#", align: "r", getValue: p => Math.abs(p.quantity), modes: ["view"] },
+	{ name: "#", align: "r", getValue: p => Math.abs(p.quantity), sortDirection: -1, modes: ["view"] },
 	getAmount("Price", p => p.price),
 	{ ...getAmount("Value", p => p.marketValue), modes: ["view"] },
 	getPctChange("Day", p => p.dayChangePct),
@@ -110,18 +111,24 @@ function Positions2(props) {
 
 	return (
 		<div className="pm-block">
-			<div className="pm-heading">
-				<div className="pm-title">
-					<input type="radio" name="positionMode" id="mode-view" value="view" checked={mode === "view"} onChange={(e) => setMode(e.target.value)} />
-					<label htmlFor="mode-view" style={{ paddingLeft: 3, marginRight: 10 }}>Positions</label>
-					<input type="radio" name="positionMode" id="mode-trade-shares" value="trades" checked={mode === "trades"} onChange={(e) => setMode(e.target.value)} />
-					<label htmlFor="mode-trade-shares" style={{ paddingLeft: 3, marginRight: 10 }}>Trades</label>
-					<input type="radio" name="positionMode" id="mode-sell-calls" value="calls" checked={mode === "calls"} onChange={(e) => setMode(e.target.value)} />
-					<label htmlFor="mode-sell-calls" style={{ paddingLeft: 3, marginRight: 10 }}>Calls to Sell</label>
-				</div>
-				<span>({viewPositions.length})</span>
-			</div>
+			{renderHeading(mode, setMode, viewPositions)}
 			<DataTable columns={visibleColumns} records={viewPositions} tableState={{ mode }} />
+		</div>
+	);
+}
+
+function renderHeading(mode, setMode, positions) {
+	return (
+		<div className="pm-heading">
+			<div className="pm-title">
+				<input type="radio" name="positionMode" id="mode-view" value="view" checked={mode === "view"} onChange={(e) => setMode(e.target.value)} />
+				<label htmlFor="mode-view" style={{ paddingLeft: 3, marginRight: 10 }}>Positions</label>
+				<input type="radio" name="positionMode" id="mode-trade-shares" value="trades" checked={mode === "trades"} onChange={(e) => setMode(e.target.value)} />
+				<label htmlFor="mode-trade-shares" style={{ paddingLeft: 3, marginRight: 10 }}>Trades</label>
+				<input type="radio" name="positionMode" id="mode-sell-calls" value="calls" checked={mode === "calls"} onChange={(e) => setMode(e.target.value)} />
+				<label htmlFor="mode-sell-calls" style={{ paddingLeft: 3, marginRight: 10 }}>Calls to Sell</label>
+			</div>
+			<span>({positions.length})</span>
 		</div>
 	);
 }

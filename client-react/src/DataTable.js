@@ -13,9 +13,11 @@ function DataTable(props) {
 		setState({});
 	}, [records, sortColumn, sortDirection, columns]);
 
-	function handleSort(colName) {
-		setSortColumn(colName);
-		setSortDirection(colName === sortColumn ? (sortDirection * -1) : 1);
+	function handleSort(column) {
+		if (column.sortDirection) {
+			setSortColumn(column.name);
+			setSortDirection(column.name === sortColumn ? (sortDirection * -1) : column.sortDirection);
+		}
 	}
 
 	return (
@@ -37,7 +39,7 @@ function DataTable(props) {
 function renderHeaderCell(column, colIndex, handleSort) {
 	const key = `${column.name}-${colIndex}`;
 	return (
-		<th key={key} className={column.align} style={{ userSelect: "none" }} onClick={() => handleSort(column.name)}>
+		<th key={key} className={column.align} style={{ userSelect: "none", cursor: column.sortDirection ? "pointer" : "default" }} onClick={() => handleSort(column)}>
 			{column.name}
 		</th>
 	);
@@ -62,7 +64,7 @@ function renderDataCell(record, rowIndex, column, colIndex, tableState) {
 	}
 	if (component === null || typeof component === "string") {
 		const renderValue = typeof component === "string" ? component : value;
-		component = (<td key={key} className={column.align}>{renderValue}</td>);
+		component = (<td key={key} className={column.align === "r" ? null : column.align}>{renderValue}</td>);
 	}
 	return component;
 }

@@ -1,5 +1,5 @@
 export function getNumber(name, getValue, digits, suffix) {
-	return { name, align: "r", getValue, render: r => r.value != null ? r.value.toFixed(digits) + suffix : "" };
+	return { name, align: "r", getValue, render: r => r.value != null ? r.value.toFixed(digits) + suffix : "", sortDirection: -1 };
 }
 
 export function getAmount(name, getValue) {
@@ -15,10 +15,25 @@ export function getPctChange(name, getValue) {
 		name,
 		align: "r",
 		getValue,
-		render: r => (
-			<td key={r.key} className={r.column.align} style={{ color: r.value >= 0 ? "green" : "#C00" }}>
+		render: r => r.value != null ? (
+			<td key={r.key} style={{ color: r.value >= 0 ? "green" : "#C00" }}>
 				{Math.abs(r.value).toFixed(2)}%
 			</td>
-		)
+		) : null,
+		sortDirection: -1
+	};
+}
+
+export function getLink(name, getValue, getUrl) {
+	return {
+		name,
+		align: "l",
+		getValue,
+		render: r => r.value != null ? (
+			<td key={r.key} className={r.column.align}>
+				<a href={getUrl(r)}>{r.value}</a>
+			</td>
+		) : null,
+		sortDirection: 1
 	};
 }
