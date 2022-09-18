@@ -73,7 +73,12 @@ function sort(records, sortColumnName, sortDirection, columns) {
 		records.sort((a, b) => {
 			const aValue = sortColumn.getValue(a);
 			const bValue = sortColumn.getValue(b);
-			const sortValue = typeof aValue === "string" && typeof bValue === "string" ? aValue.localeCompare(bValue) : (aValue - bValue);
+			let sortValue;
+			if (typeof aValue === "string" && typeof bValue === "string") {
+				sortValue = aValue.localeCompare(bValue);
+			} else {
+				sortValue = (aValue || 0) - (bValue || 0);
+			}
 			return sortValue * sortDirection;
 		}) :
 		records;

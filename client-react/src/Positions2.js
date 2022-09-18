@@ -3,6 +3,7 @@ import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
 
 import DataTable from './DataTable';
 import { renderPositionPopup } from './PositionPopup';
+import { getAmount, getPct, getPctChange } from "./tableUtils";
 
 const columns = [
 	{
@@ -28,23 +29,13 @@ const columns = [
 		)
 	},
 	{ name: "#", align: "r", getValue: p => Math.abs(p.quantity), modes: ["view"] },
-	{ name: "Price", align: "r", getValue: p => p.price, render: r => r.value.toFixed(2) },
-	{ name: "Value", align: "r", getValue: p => p.marketValue, render: r => r.value.toFixed(2), modes: ["view"] },
-	{
-		name: "Day",
-		align: "r",
-		getValue: p => p.dayChangePct,
-		render: r => (<td key={r.key} className={r.column.align} style={{ color: r.value >= 0 ? "green" : "#C00" }}>{Math.abs(r.value).toFixed(2)}%</td>)
-	},
-	{
-		name: "G/L",
-		align: "r",
-		getValue: p => p.gainLossPct,
-		render: r => (<td key={r.key} className={r.column.align} style={{ color: r.value >= 0 ? "green" : "#C00" }}>{Math.abs(r.value).toFixed(2)}%</td>)
-	},
-	{ name: "Actual", align: "r", getValue: p => p.percentOfAccount, render: r => r.value ? r.value.toFixed(2) + "%" : "", modes: ["view"] },
-	{ name: "Target", align: "r", getValue: p => p.targetPct, render: r => r.value ? r.value.toFixed(2) + "%" : "", modes: ["view"] },
-	{ name: "Ratio", align: "r", getValue: p => p.percentOfAccount && p.targetPct ? (100 * p.percentOfAccount / p.targetPct) : null, render: r => r.value ? r.value.toFixed(1) + "%" : "", modes: ["view", "trades"] },
+	getAmount("Price", p => p.price),
+	{ ...getAmount("Value", p => p.marketValue), modes: ["view"] },
+	getPctChange("Day", p => p.dayChangePct),
+	getPctChange("G/L", p => p.gainLossPct),
+	{ ...getPct("Actual", p => p.percentOfAccount), modes: ["view"] },
+	{ ...getPct("Target", p => p.targetPct), modes: ["view"] },
+	{ ...getPct("Ratio", p => p.percentOfAccount && p.targetPct ? (100 * p.percentOfAccount / p.targetPct) : null, 1), modes: ["view", "trades"] },
 	{
 		name: "Trade",
 		align: "c",
@@ -81,13 +72,7 @@ const columns = [
 		},
 		modes: ["view", "trades"]
 	},
-	{
-		name: "Amount",
-		align: "r",
-		getValue: p => p.sharesToBuy * p.price,
-		render: r => r.value.toFixed(2),
-		modes: ["trades"]
-	},
+	{ ...getAmount("Amount", p => p.sharesToBuy * p.price), modes: ["trades"] },
 	{
 		name: "Sell Calls",
 		align: "c",
