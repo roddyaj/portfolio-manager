@@ -25,7 +25,7 @@ function DataTable(props) {
 			<table>
 				<thead>
 					<tr>
-						{columns.map((column, i) => renderHeaderCell(column, i, handleSort))}
+						{columns.map((column, i) => renderHeaderCell(column, i, sortColumn, sortDirection, handleSort))}
 					</tr>
 				</thead>
 				<tbody>
@@ -36,11 +36,12 @@ function DataTable(props) {
 	);
 }
 
-function renderHeaderCell(column, colIndex, handleSort) {
+function renderHeaderCell(column, colIndex, sortColumn, sortDirection, handleSort) {
 	const key = `${column.name}-${colIndex}`;
 	return (
 		<th key={key} className={column.align} style={{ userSelect: "none", cursor: column.sortDirection ? "pointer" : "default" }} onClick={() => handleSort(column)}>
 			{column.name}
+			{column.name === sortColumn && (sortDirection === 1 ? <i className="bi bi-caret-up-fill" /> : <i className="bi bi-caret-down-fill" />)}
 		</th>
 	);
 }

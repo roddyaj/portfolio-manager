@@ -73,7 +73,7 @@ const columns = [
 		},
 		modes: ["view", "trades"]
 	},
-	{ ...getAmount("Amount", p => p.sharesToBuy * p.price), modes: ["trades"] },
+	{ ...getAmount("Amount", p => p.sharesToBuy * p.price), sortDirection: 1, modes: ["trades"] },
 	{
 		name: "Sell Calls",
 		align: "c",

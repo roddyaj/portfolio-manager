@@ -64,7 +64,7 @@ function renderStatistics(position) {
 }
 
 function renderOpenOrders(position) {
-	if (!position.openOrders)
+	if (!position.openOrders || !position.openOrders.length)
 		return null;
 
 	const sortedOrders = position.openOrders.sort((a, b) => b.limitPrice - a.limitPrice);
@@ -104,7 +104,7 @@ function renderOpenOrders(position) {
 }
 
 function renderOptions(position) {
-	if (!position.options)
+	if (!position.options || !position.options.length)
 		return null;
 
 	const rows = position.options.filter(o => o.quantity < 0).map((option, i) => {
@@ -132,7 +132,7 @@ function renderOptions(position) {
 
 
 function renderTransactions(position) {
-	if (!position.transactions)
+	if (!position.transactions || !position.transactions.length)
 		return null;
 
 	const rows = position.transactions.slice(0, 10).map((transaction, i) => (
