@@ -21,6 +21,8 @@ public class Output
 
 	private long positionsTime;
 
+	private double sp500YtdReturn;
+
 	private List<Position> positions;
 
 	private List<MonthlyIncome> income;
@@ -105,6 +107,16 @@ public class Output
 	public void setPositionsTime(long positionsTime)
 	{
 		this.positionsTime = positionsTime;
+	}
+
+	public double getSp500YtdReturn()
+	{
+		return sp500YtdReturn;
+	}
+
+	public void setSp500YtdReturn(double sp500YtdReturn)
+	{
+		this.sp500YtdReturn = sp500YtdReturn;
 	}
 
 	public List<Position> getPositions()

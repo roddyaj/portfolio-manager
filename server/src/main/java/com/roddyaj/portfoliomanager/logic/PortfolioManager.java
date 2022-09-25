@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.roddyaj.portfoliomanager.api.SP500ReturnAPI;
 import com.roddyaj.portfoliomanager.model.Message;
 import com.roddyaj.portfoliomanager.model.Portfolio;
 import com.roddyaj.portfoliomanager.model.Quote;
@@ -160,6 +161,8 @@ public final class PortfolioManager
 			output.setIncome(calculateIncome(transactions.transactions()));
 
 		state.setLastRefresh(Instant.now());
+
+		output.setSp500YtdReturn(SP500ReturnAPI.getYtdSp500Return());
 
 		return output;
 	}
