@@ -1,6 +1,8 @@
 package com.roddyaj.portfoliomanager.settings;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.stream.Stream;
 
 public class AccountSettings
@@ -12,6 +14,8 @@ public class AccountSettings
 	private double startingBalance;
 	private boolean optionsEnabled = true;
 	private Allocation[] allocations;
+
+	private Map<String, Allocation> allocationMap;
 
 	public String getName()
 	{
@@ -86,11 +90,29 @@ public class AccountSettings
 	public Stream<String> allocationStream()
 	{
 		return allocations == null ? Stream.of()
-				: Arrays.stream(allocations).map(Allocation::getCatLastToken).filter(s -> s.toUpperCase().equals(s)).distinct();
+			: Arrays.stream(allocations).map(Allocation::getCatLastToken).filter(s -> s.toUpperCase().equals(s)).distinct();
 	}
 
 	public boolean hasAllocation(String symbol)
 	{
 		return allocations != null && Arrays.stream(allocations).anyMatch(a -> a.getCatLastToken().equals(symbol));
+	}
+
+	public Allocation getAllocation(String symbol)
+	{
+		if (allocationMap == null)
+		{
+			if (allocations != null)
+			{
+				allocationMap = new HashMap<>();
+				for (Allocation allocation : allocations)
+					allocationMap.put(allocation.getCatLastToken(), allocation);
+			}
+			else
+			{
+				allocationMap = Map.of();
+			}
+		}
+		return allocationMap.get(symbol);
 	}
 }

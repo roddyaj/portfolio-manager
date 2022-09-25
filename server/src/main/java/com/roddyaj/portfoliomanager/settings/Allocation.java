@@ -7,6 +7,7 @@ public class Allocation
 {
 	private String cat;
 	private double percent;
+	private Double minOrder;
 
 	public Allocation()
 	{
@@ -47,6 +48,16 @@ public class Allocation
 	public void setPercent(double percent)
 	{
 		this.percent = percent;
+	}
+
+	public Double getMinOrder()
+	{
+		return minOrder;
+	}
+
+	public void setMinOrder(Double minOrder)
+	{
+		this.minOrder = minOrder;
 	}
 
 	@Override

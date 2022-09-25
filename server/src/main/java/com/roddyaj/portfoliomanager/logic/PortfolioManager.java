@@ -34,6 +34,7 @@ import com.roddyaj.portfoliomanager.schwab.OrdersMonitor;
 import com.roddyaj.portfoliomanager.schwab.PositionsMonitor;
 import com.roddyaj.portfoliomanager.schwab.TransactionsMonitor;
 import com.roddyaj.portfoliomanager.settings.AccountSettings;
+import com.roddyaj.portfoliomanager.settings.Allocation;
 import com.roddyaj.portfoliomanager.settings.Settings;
 import com.roddyaj.schwabparse.SchwabOrder;
 import com.roddyaj.schwabparse.SchwabOrdersData;
@@ -251,8 +252,11 @@ public final class PortfolioManager
 			double delta = targetValue - position.getMarketValue();
 			int quantity = round(delta / position.getPrice(), .75);
 			boolean isBuy = quantity > 0;
-			boolean doOrder = quantity != 0 && Math.abs(delta / targetValue) > (isBuy ? 0.005 : 0.02)
-				&& Math.abs(quantity * position.getPrice()) >= accountSettings.getMinOrder();
+			double orderAmount = Math.abs(quantity * position.getPrice());
+			Allocation allocation = accountSettings.getAllocation(position.getSymbol());
+			double positionMinOrder = allocation != null && allocation.getMinOrder() != null ? allocation.getMinOrder().doubleValue() : 0;
+			boolean doOrder = quantity != 0 && Math.abs(delta / targetValue) > (isBuy ? 0.005 : 0.02) && orderAmount >= accountSettings.getMinOrder()
+				&& orderAmount >= positionMinOrder;
 			if (doOrder)
 				sharesToBuy = quantity;
 		}
