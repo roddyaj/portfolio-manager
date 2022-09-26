@@ -1,6 +1,5 @@
 package com.roddyaj.portfoliomanager.model;
 
-import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Instant;
@@ -11,8 +10,9 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+
 import com.roddyaj.portfoliomanager.settings.Settings;
+import com.roddyaj.portfoliomanager.settings.SettingsReader;
 
 public final class State
 {
@@ -22,6 +22,8 @@ public final class State
 	{
 		return INSTANCE;
 	}
+
+	private final SettingsReader settingsReader = new SettingsReader();
 
 	private Instant lastRefresh;
 
@@ -38,17 +40,7 @@ public final class State
 
 	public Settings getSettings()
 	{
-		Settings settings = null;
-		Path settingsFile = Paths.get(Paths.get(System.getProperty("user.home"), ".invest").toString(), "settings.json");
-		try
-		{
-			settings = new ObjectMapper().readValue(settingsFile.toFile(), Settings.class);
-		}
-		catch (IOException e)
-		{
-			e.printStackTrace();
-		}
-		return settings;
+		return settingsReader.getSettings();
 	}
 
 	public synchronized Instant getLastRefresh()
