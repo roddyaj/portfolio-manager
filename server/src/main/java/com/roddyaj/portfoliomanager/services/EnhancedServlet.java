@@ -1,6 +1,7 @@
 package com.roddyaj.portfoliomanager.services;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -20,5 +21,14 @@ public abstract class EnhancedServlet extends HttpServlet
 		response.addHeader("Access-Control-Allow-Origin", "*");
 
 		MAPPER.writeValue(response.getOutputStream(), value);
+	}
+
+	public void writeError(String message, HttpServletResponse response) throws IOException
+	{
+		response.setContentType("text/plain");
+		response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+		response.addHeader("Access-Control-Allow-Origin", "*");
+
+		response.getOutputStream().write(message.getBytes(Charset.defaultCharset()));
 	}
 }

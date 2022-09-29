@@ -69,12 +69,12 @@ function renderOpenOrders(position) {
 
 	const sortedOrders = position.openOrders.sort((a, b) => b.limitPrice - a.limitPrice);
 	const rows = [];
-	rows.push(...sortedOrders.filter(o => o.action === 'Sell').map((order, i) => (
+	rows.push(...sortedOrders.filter(o => o.action.startsWith('Sell')).map((order, i) => (
 		<tr key={`pospop-opensell-${position.symbol}-${i}`}>
 			<td>{order.action}</td>
 			<td>{order.quantity}</td>
 			<td>@</td>
-			<td>{order.limitPrice.toFixed(2)}</td>
+			<td>{order.strike ? order.strike.toFixed(2) : order.limitPrice.toFixed(2)}</td>
 		</tr>
 	)));
 	rows.push((
@@ -83,12 +83,12 @@ function renderOpenOrders(position) {
 			<td>{position.price.toFixed(2)}</td>
 		</tr>
 	));
-	rows.push(...sortedOrders.filter(o => o.action === 'Buy').map((order, i) => (
+	rows.push(...sortedOrders.filter(o => o.action.startsWith('Buy')).map((order, i) => (
 		<tr key={`pospop-openbuy-${position.symbol}-${i}`}>
 			<td>{order.action}</td>
 			<td>{order.quantity}</td>
 			<td>@</td>
-			<td>{order.limitPrice.toFixed(2)}</td>
+			<td>{order.strike ? order.strike.toFixed(2) : order.limitPrice.toFixed(2)}</td>
 		</tr>
 	)));
 	return (
@@ -140,7 +140,7 @@ function renderTransactions(position) {
 			<td>{transaction.date}</td>
 			<td>{transaction.action}</td>
 			<td>{transaction.quantity}</td>
-			<td>{transaction.price.toFixed(2)}</td>
+			<td>{transaction.strike ? transaction.strike.toFixed(2) : transaction.price.toFixed(2)}</td>
 		</tr>
 	));
 	return (

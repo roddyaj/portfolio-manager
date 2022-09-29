@@ -11,6 +11,8 @@ public class Transaction
 	private double quantity;
 	private double price;
 	private double amount;
+	private Double strike;
+	private String type;
 
 	public String getDate()
 	{
@@ -60,5 +62,25 @@ public class Transaction
 	public void setAmount(double amount)
 	{
 		this.amount = amount;
+	}
+
+	public Double getStrike()
+	{
+		return strike;
+	}
+
+	public void setStrike(Double strike)
+	{
+		this.strike = strike;
+	}
+
+	public String getType()
+	{
+		return type;
+	}
+
+	public void setType(String type)
+	{
+		this.type = type;
 	}
 }

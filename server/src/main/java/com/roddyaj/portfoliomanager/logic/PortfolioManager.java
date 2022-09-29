@@ -48,7 +48,6 @@ public final class PortfolioManager
 	private static final Set<String> shortOptionActions = Set.of("Sell to Open", "Buy to Close");
 	private static final Set<String> transferActions = Set.of("Journal", "MoneyLink Deposit", "MoneyLink Transfer", "Funds Received",
 		"Bank Transfer");
-	private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("M/d/yyyy");
 
 	public Output process(Path inputDir, String accountName, Settings settings)
 	{
@@ -80,13 +79,14 @@ public final class PortfolioManager
 		output.setAccountName(accountName);
 
 		SchwabTransactionsData transactions = portfolio.getTransactions();
-		Map<String, List<SchwabTransaction>> symbolToTransactions = transactions != null ? transactions.transactions().stream()
-			.filter(t -> t.symbol() != null && t.quantity() != null && t.price() != null).collect(Collectors.groupingBy(SchwabTransaction::symbol))
+		Map<String, List<SchwabTransaction>> symbolToTransactions = transactions != null
+			? transactions.transactions().stream().filter(t -> t.symbol() != null && t.quantity() != null && t.price() != null).collect(
+				Collectors.groupingBy(SchwabTransaction::getActualSymbol))
 			: Map.of();
 
 		SchwabOrdersData orders = portfolio.getOrders();
 		Map<String, List<SchwabOrder>> symbolToOrders = orders != null
-			? orders.getOpenOrders().stream().filter(o -> o.symbol() != null).collect(Collectors.groupingBy(SchwabOrder::symbol))
+			? orders.getOpenOrders().stream().filter(o -> o.symbol() != null).collect(Collectors.groupingBy(SchwabOrder::getActualSymbol))
 			: Map.of();
 
 		List<Message> messages = new ArrayList<>();
@@ -100,7 +100,7 @@ public final class PortfolioManager
 			Instant portfolioTime = positions.time().toInstant();
 
 			Map<String, List<SchwabPosition>> symbolToOptions = positions.positions().stream().filter(SchwabPosition::isOption)
-				.collect(Collectors.groupingBy(p -> p.symbol().split(" ")[0]));
+				.collect(Collectors.groupingBy(SchwabPosition::getActualSymbol));
 			Map<String, SchwabPosition> symbolToPosition = positions.positions().stream().filter(p -> !p.isOption())
 				.collect(Collectors.toMap(SchwabPosition::symbol, Function.identity()));
 
@@ -184,12 +184,11 @@ public final class PortfolioManager
 		position.setPeRatio(schwabPosition.peRatio());
 		position.set52WeekLow(schwabPosition._52WeekLow());
 		position.set52WeekHigh(schwabPosition._52WeekHigh());
-		if (schwabPosition.intrinsicValue() != null)
+		if (schwabPosition.isOption())
 		{
-			String[] tokens = schwabPosition.symbol().split(" ");
-			LocalDate expiryDate = LocalDate.parse(tokens[1], DATE_FORMAT);
-			double strike = Double.parseDouble(tokens[2]);
-			String type = tokens[3];
+			LocalDate expiryDate = schwabPosition.option().expiryDate();
+			double strike = schwabPosition.option().strike();
+			String type = schwabPosition.option().type();
 			position.setUnderlyingPrice(type.equals("P") ? strike - schwabPosition.intrinsicValue() : strike + schwabPosition.intrinsicValue());
 			position.setInTheMoney("ITM".equals(schwabPosition.inTheMoney()));
 			position.setDte((int)ChronoUnit.DAYS.between(LocalDate.now(), expiryDate));
@@ -205,6 +204,11 @@ public final class PortfolioManager
 		transaction.setQuantity(schwabTransaction.quantity().doubleValue());
 		transaction.setPrice(schwabTransaction.price().doubleValue());
 		transaction.setAmount(schwabTransaction.amount().doubleValue());
+		if (schwabTransaction.isOption())
+		{
+			transaction.setStrike(schwabTransaction.option().strike());
+			transaction.setType(schwabTransaction.option().type());
+		}
 		return transaction;
 	}
 
@@ -216,6 +220,11 @@ public final class PortfolioManager
 		order.setOrderType(schwabOrder.orderType());
 		order.setLimitPrice(schwabOrder.limitPrice());
 		order.setTiming(schwabOrder.timing().toString());
+		if (schwabOrder.isOption())
+		{
+			order.setStrike(schwabOrder.option().strike());
+			order.setType(schwabOrder.option().type());
+		}
 		return order;
 	}
 

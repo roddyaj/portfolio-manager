@@ -17,12 +17,20 @@ public class PortfolioServlet extends EnhancedServlet
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
 	{
-		State state = State.getInstance();
+		try
+		{
+			State state = State.getInstance();
 
-		String accountName = request.getParameter("accountName");
+			String accountName = request.getParameter("accountName");
 
-		Output output = new PortfolioManager().process(state.getInputDir(), accountName, state.getSettings());
+			Output output = new PortfolioManager().process(state.getInputDir(), accountName, state.getSettings());
 
-		writeJson(output, response);
+			writeJson(output, response);
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			writeError(e.getMessage(), response);
+		}
 	}
 }
