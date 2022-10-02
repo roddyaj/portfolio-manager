@@ -28,7 +28,7 @@ function Options(props) {
 	return (
 		<div className="pm-block">
 			<div className="pm-heading">
-				<div className="pm-title">{`${isLong ? "Long" : "Short"} ${type}`}</div>
+				<div className="pm-title">{`${isLong ? "Long" : "Sold"} ${type}`}</div>
 				<span style={{ marginLeft: 10 }}>({optionPositions.length})</span>
 			</div>
 			<DataTable columns={columns} records={optionPositions} />

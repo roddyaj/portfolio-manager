@@ -54,13 +54,22 @@ const columns = [
 		modes: ["trades"]
 	},
 	{
+		name: "Sell Calls",
+		align: "c",
+		getValue: p => p.callsToSell,
+		render: r => (<td key={r.key} className={r.column.align}><a href={`https://client.schwab.com/Areas/Trade/Options/Chains/Index.aspx#symbol/${r.record.symbol}`}><button>Sell {r.value}</button></a></td>),
+		modes: ["calls"]
+	},
+	{
 		name: "Open",
 		align: "c",
 		getValue: () => 0,
 		render: r => {
+			const isOption = r.tableState.mode === "calls";
 			const action = r.record.sharesToBuy > 0 ? "Buy" : "Sell";
-			const openBuyCount = r.record.openOrders ? r.record.openOrders.filter(o => o.action === "Buy").map(o => o.quantity).reduce((tot, cur) => tot + cur, 0) : 0;
-			const openSellCount = r.record.openOrders ? r.record.openOrders.filter(o => o.action === "Sell").map(o => o.quantity).reduce((tot, cur) => tot + cur, 0) : 0;
+			const relevantOpenOrders = r.record.openOrders ? r.record.openOrders.filter(o => o.option === isOption) : [];
+			const openBuyCount = relevantOpenOrders.filter(o => o.action.startsWith("Buy")).map(o => o.quantity).reduce((tot, cur) => tot + cur, 0);
+			const openSellCount = relevantOpenOrders.filter(o => o.action.startsWith("Sell")).map(o => o.quantity).reduce((tot, cur) => tot + cur, 0);
 			const openOrderArray = [['B', openBuyCount], ['S', openSellCount]].filter(a => a[1] !== 0);
 			const openOrderText = r.tableState.mode === "view"
 				? openOrderArray.map(a => a.join(" ")).join(", ")
@@ -70,17 +79,9 @@ const columns = [
 					<a href="https://client.schwab.com/Trade/OrderStatus/ViewOrderStatus.aspx?ViewTypeFilter=Open">{openOrderText}</a>
 				</td>
 			)
-		},
-		modes: ["view", "trades"]
+		}
 	},
 	{ ...getAmount("Amount", p => p.sharesToBuy * p.price), sortDirection: 1, modes: ["trades"] },
-	{
-		name: "Sell Calls",
-		align: "c",
-		getValue: p => p.callsToSell,
-		render: r => (<td key={r.key} className={r.column.align}><a href={`https://client.schwab.com/Areas/Trade/Options/Chains/Index.aspx#symbol/${r.record.symbol}`}><button>Sell {r.value}</button></a></td>),
-		modes: ["calls"]
-	},
 	{
 		name: "",
 		align: "l",

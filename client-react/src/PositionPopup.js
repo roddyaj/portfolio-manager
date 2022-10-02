@@ -135,14 +135,17 @@ function renderTransactions(position) {
 	if (!position.transactions || !position.transactions.length)
 		return null;
 
-	const rows = position.transactions.slice(0, 10).map((transaction, i) => (
-		<tr key={`pospop-transaction-${position.symbol}-${i}`}>
-			<td>{transaction.date}</td>
-			<td>{transaction.action}</td>
-			<td>{transaction.quantity}</td>
-			<td>{transaction.strike ? transaction.strike.toFixed(2) : transaction.price.toFixed(2)}</td>
-		</tr>
-	));
+	const rows = position.transactions.slice(0, 10).map((transaction, i) => {
+		const action = transaction.action.replace("to Open", transaction.type === "C" ? "Call" : "Put");
+		return (
+			<tr key={`pospop-transaction-${position.symbol}-${i}`}>
+				<td>{transaction.date}</td>
+				<td>{action}</td>
+				<td>{transaction.quantity}</td>
+				<td>{transaction.strike ? transaction.strike.toFixed(2) : transaction.price.toFixed(2)}</td>
+			</tr>
+		);
+	});
 	return (
 		<div style={{ marginTop: 16 }}>
 			<div style={{ fontWeight: "bold", marginBottom: 2 }}>Transactions</div>

@@ -83,4 +83,9 @@ public class Order
 	{
 		this.type = type;
 	}
+
+	public boolean isOption()
+	{
+		return strike != null;
+	}
 }
