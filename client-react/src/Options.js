@@ -6,7 +6,7 @@ const columns = [
 	{ name: "#", align: "r", getValue: p => Math.abs(p.quantity), sortDirection: -1 },
 	{ name: "Expiry", align: "c", getValue: p => `${p.symbol.split(" ")[1]} (${p.dte})`, sortDirection: 1 },
 	getAmount("Strike", p => Number(p.symbol.split(" ")[2])),
-	getAmount("Price", p => p.underlyingPrice ? p.underlyingPrice : 0),
+	getAmount("Price", p => p.underlyingPrice),
 	{
 		name: "ITM",
 		align: "c",

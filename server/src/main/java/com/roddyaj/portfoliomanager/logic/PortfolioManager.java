@@ -189,7 +189,8 @@ public final class PortfolioManager
 			LocalDate expiryDate = schwabPosition.option().expiryDate();
 			double strike = schwabPosition.option().strike();
 			String type = schwabPosition.option().type();
-			position.setUnderlyingPrice(type.equals("P") ? strike - schwabPosition.intrinsicValue() : strike + schwabPosition.intrinsicValue());
+			if (schwabPosition.intrinsicValue() != null)
+				position.setUnderlyingPrice(type.equals("P") ? strike - schwabPosition.intrinsicValue() : strike + schwabPosition.intrinsicValue());
 			position.setInTheMoney("ITM".equals(schwabPosition.inTheMoney()));
 			position.setDte((int)ChronoUnit.DAYS.between(LocalDate.now(), expiryDate));
 		}

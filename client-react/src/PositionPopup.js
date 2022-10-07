@@ -120,7 +120,7 @@ function renderOptions(position) {
 	});
 	return (
 		<div style={{ marginTop: 16 }}>
-			<div style={{ fontWeight: "bold", marginBottom: 2 }}>Short Options</div>
+			<div style={{ fontWeight: "bold", marginBottom: 2 }}>Sold Options</div>
 			<table>
 				<tbody>
 					{rows}
@@ -140,7 +140,7 @@ function renderTransactions(position) {
 		return (
 			<tr key={`pospop-transaction-${position.symbol}-${i}`}>
 				<td>{transaction.date}</td>
-				<td>{action}</td>
+				<td className='l'>{action}</td>
 				<td>{transaction.quantity}</td>
 				<td>{transaction.strike ? transaction.strike.toFixed(2) : transaction.price.toFixed(2)}</td>
 			</tr>
