@@ -10,11 +10,11 @@ const columns = [
 function PutsToSell(props) {
 	const { portfolio } = props;
 
-	const putsToSell = portfolio.putsToSell.sort((a, b) => a.dayChangePct - b.dayChangePct);
-
-	if (putsToSell.length === 0) {
+	if (!portfolio.optionsEnabled || portfolio.putsToSell.length === 0) {
 		return null;
 	}
+
+	const putsToSell = portfolio.putsToSell.sort((a, b) => a.dayChangePct - b.dayChangePct);
 
 	return (
 		<div className="pm-block">

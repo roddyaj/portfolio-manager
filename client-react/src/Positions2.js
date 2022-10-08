@@ -112,22 +112,30 @@ function Positions2(props) {
 
 	return (
 		<div className="pm-block">
-			{renderHeading(mode, setMode, viewPositions)}
+			{renderHeading(portfolio, mode, setMode, viewPositions)}
 			<DataTable columns={visibleColumns} records={viewPositions} tableState={{ mode }} />
 		</div>
 	);
 }
 
-function renderHeading(mode, setMode, positions) {
+function renderHeading(portfolio, mode, setMode, positions) {
 	return (
 		<div className="pm-heading">
 			<div className="pm-title">
-				<input type="radio" name="positionMode" id="mode-view" value="view" checked={mode === "view"} onChange={(e) => setMode(e.target.value)} />
-				<label htmlFor="mode-view" style={{ paddingLeft: 3, marginRight: 10 }}>Positions</label>
-				<input type="radio" name="positionMode" id="mode-trade-shares" value="trades" checked={mode === "trades"} onChange={(e) => setMode(e.target.value)} />
-				<label htmlFor="mode-trade-shares" style={{ paddingLeft: 3, marginRight: 10 }}>Trades</label>
-				<input type="radio" name="positionMode" id="mode-sell-calls" value="calls" checked={mode === "calls"} onChange={(e) => setMode(e.target.value)} />
-				<label htmlFor="mode-sell-calls" style={{ paddingLeft: 3, marginRight: 10 }}>Calls to Sell</label>
+				<>
+					<input type="radio" name="positionMode" id="mode-view" value="view" checked={mode === "view"} onChange={(e) => setMode(e.target.value)} />
+					<label htmlFor="mode-view" style={{ paddingLeft: 3, marginRight: 10 }}>Positions</label>
+				</>
+				<>
+					<input type="radio" name="positionMode" id="mode-trade-shares" value="trades" checked={mode === "trades"} onChange={(e) => setMode(e.target.value)} />
+					<label htmlFor="mode-trade-shares" style={{ paddingLeft: 3, marginRight: 10 }}>Trades</label>
+				</>
+				{portfolio.optionsEnabled && (
+					<>
+						<input type="radio" name="positionMode" id="mode-sell-calls" value="calls" checked={mode === "calls"} onChange={(e) => setMode(e.target.value)} />
+						<label htmlFor="mode-sell-calls" style={{ paddingLeft: 3, marginRight: 10 }}>Calls to Sell</label>
+					</>
+				)}
 			</div>
 			<span>({positions.length})</span>
 		</div>

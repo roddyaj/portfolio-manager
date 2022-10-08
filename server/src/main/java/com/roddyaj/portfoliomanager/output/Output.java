@@ -7,6 +7,8 @@ public class Output
 {
 	private String accountName;
 
+	private boolean optionsEnabled;
+
 	private double balance;
 
 	private double cash;
@@ -37,6 +39,16 @@ public class Output
 	public void setAccountName(String accountName)
 	{
 		this.accountName = accountName;
+	}
+
+	public boolean isOptionsEnabled()
+	{
+		return optionsEnabled;
+	}
+
+	public void setOptionsEnabled(boolean optionsEnabled)
+	{
+		this.optionsEnabled = optionsEnabled;
 	}
 
 	public double getBalance()

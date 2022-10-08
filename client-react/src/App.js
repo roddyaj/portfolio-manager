@@ -67,10 +67,10 @@ function App() {
 						</div>
 						<div className="pm-column">
 							<PutsToSell portfolio={portfolio} />
-							<Options positions={portfolio.positions} isLong={false} type="Calls" />
-							<Options positions={portfolio.positions} isLong={false} type="Puts" />
-							<Options positions={portfolio.positions} isLong={true} type="Calls" />
-							<Options positions={portfolio.positions} isLong={true} type="Puts" />
+							<Options portfolio={portfolio} isLong={false} type="Calls" />
+							<Options portfolio={portfolio} isLong={false} type="Puts" />
+							<Options portfolio={portfolio} isLong={true} type="Calls" />
+							<Options portfolio={portfolio} isLong={true} type="Puts" />
 						</div>
 						<div className="pm-column">
 							<Cash portfolio={portfolio} />

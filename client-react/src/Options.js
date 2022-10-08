@@ -17,7 +17,8 @@ const columns = [
 ];
 
 function Options(props) {
-	const { positions, isLong, type } = props;
+	const { portfolio, isLong, type } = props;
+	const { positions } = portfolio;
 
 	const optionPositions = positions.filter(p => p.symbol.includes(" ") && p.symbol.endsWith(type.charAt(0)) && ((!isLong && p.quantity < 0) || (isLong && p.quantity > 0)));
 

@@ -77,6 +77,7 @@ public final class PortfolioManager
 	{
 		Output output = new Output();
 		output.setAccountName(accountName);
+		output.setOptionsEnabled(accountSettings.isOptionsEnabled());
 
 		SchwabTransactionsData transactions = portfolio.getTransactions();
 		Map<String, List<SchwabTransaction>> symbolToTransactions = transactions != null
