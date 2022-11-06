@@ -15,7 +15,7 @@ public class OrdersMonitor extends AbstractMonitor
 	@Override
 	protected Path getFile()
 	{
-		return getFile(accountNumber + " Order Details.*\\.CSV", (p1, p2) -> SchwabOrdersReader.getTime(p2).compareTo(SchwabOrdersReader.getTime(p1)));
+		return getFile(accountNumber + " Order Details.*\\.csv", (p1, p2) -> SchwabOrdersReader.getTime(p2).compareTo(SchwabOrdersReader.getTime(p1)));
 	}
 
 	@Override

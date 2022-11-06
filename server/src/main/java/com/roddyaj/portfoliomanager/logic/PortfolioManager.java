@@ -1,5 +1,6 @@
 package com.roddyaj.portfoliomanager.logic;
 
+import java.io.IOException;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -18,6 +19,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.fasterxml.jackson.databind.JsonNode;
+
+import com.roddyaj.portfoliomanager.api.FinnhubAPI;
 import com.roddyaj.portfoliomanager.api.SP500ReturnAPI;
 import com.roddyaj.portfoliomanager.model.Message;
 import com.roddyaj.portfoliomanager.model.Portfolio;
@@ -35,6 +38,7 @@ import com.roddyaj.portfoliomanager.schwab.PositionsMonitor;
 import com.roddyaj.portfoliomanager.schwab.TransactionsMonitor;
 import com.roddyaj.portfoliomanager.settings.AccountSettings;
 import com.roddyaj.portfoliomanager.settings.Allocation;
+import com.roddyaj.portfoliomanager.settings.Api;
 import com.roddyaj.portfoliomanager.settings.Settings;
 import com.roddyaj.schwabparse.SchwabOrder;
 import com.roddyaj.schwabparse.SchwabOrdersData;
@@ -48,6 +52,19 @@ public final class PortfolioManager
 	private static final Set<String> shortOptionActions = Set.of("Sell to Open", "Buy to Close");
 	private static final Set<String> transferActions = Set.of("Journal", "MoneyLink Deposit", "MoneyLink Transfer", "Funds Received",
 		"Bank Transfer");
+
+	private final FinnhubAPI finnhubAPI;
+
+	public PortfolioManager(Settings settings)
+	{
+		finnhubAPI = new FinnhubAPI();
+		Api apiSettings = settings.getApi(finnhubAPI.getName());
+		if (apiSettings != null)
+		{
+			finnhubAPI.setApiKey(apiSettings.getApiKey());
+			finnhubAPI.setRequestLimitPerMinute(apiSettings.getRequestsPerMinute());
+		}
+	}
 
 	public Output process(Path inputDir, String accountName, Settings settings)
 	{
@@ -221,7 +238,7 @@ public final class PortfolioManager
 		order.setQuantity(schwabOrder.quantity());
 		order.setOrderType(schwabOrder.orderType());
 		order.setLimitPrice(schwabOrder.limitPrice());
-		order.setTiming(schwabOrder.timing().toString());
+//		order.setTiming(schwabOrder.timing().toString());
 		if (schwabOrder.isOption())
 		{
 			order.setStrike(schwabOrder.option().strike());
@@ -230,7 +247,7 @@ public final class PortfolioManager
 		return order;
 	}
 
-	private static List<Position> getNewPositions(List<? extends SchwabPosition> positions, SchwabOrdersData orders, AllocationMap allocationMap)
+	private List<Position> getNewPositions(List<? extends SchwabPosition> positions, SchwabOrdersData orders, AllocationMap allocationMap)
 	{
 		List<Position> newPositions = new ArrayList<>();
 
@@ -247,7 +264,18 @@ public final class PortfolioManager
 		{
 			Position position = new Position();
 			position.setSymbol(symbol);
-			position.setPrice(1);
+			double price = 1;
+			try
+			{
+				Quote quote = finnhubAPI.getQuote(symbol);
+				if (quote != null)
+					price = quote.price();
+			}
+			catch (IOException e)
+			{
+				e.printStackTrace();
+			}
+			position.setPrice(price);
 			newPositions.add(position);
 		}
 
@@ -266,7 +294,7 @@ public final class PortfolioManager
 			double orderAmount = Math.abs(quantity * position.getPrice());
 			Allocation allocation = accountSettings.getAllocation(position.getSymbol());
 			double positionMinOrder = allocation != null && allocation.getMinOrder() != null ? allocation.getMinOrder().doubleValue() : 0;
-			boolean doOrder = quantity != 0 && Math.abs(delta / targetValue) > (isBuy ? 0.005 : 0.02) && orderAmount >= accountSettings.getMinOrder()
+			boolean doOrder = quantity != 0 && Math.abs(delta / targetValue) > (isBuy ? 0.005 : 0.01) && orderAmount >= accountSettings.getMinOrder()
 				&& orderAmount >= positionMinOrder;
 			if (doOrder)
 				sharesToBuy = quantity;

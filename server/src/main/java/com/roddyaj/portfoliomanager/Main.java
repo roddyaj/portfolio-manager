@@ -63,9 +63,8 @@ public class Main
 		State state = State.getInstance();
 		Settings settings = state.getSettings();
 
-		Api apiSettings;
 		FinnhubAPI finnhub = new FinnhubAPI();
-		apiSettings = settings.getApi(finnhub.getName());
+		Api apiSettings = settings.getApi(finnhub.getName());
 		if (apiSettings != null)
 		{
 			finnhub.setApiKey(apiSettings.getApiKey());

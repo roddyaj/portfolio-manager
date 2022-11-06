@@ -23,7 +23,7 @@ public class PortfolioServlet extends EnhancedServlet
 
 			String accountName = request.getParameter("accountName");
 
-			Output output = new PortfolioManager().process(state.getInputDir(), accountName, state.getSettings());
+			Output output = new PortfolioManager(state.getSettings()).process(state.getInputDir(), accountName, state.getSettings());
 
 			writeJson(output, response);
 		}
