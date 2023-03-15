@@ -36,7 +36,7 @@ const columns = [
 	getPctChange("G/L", p => p.gainLossPct),
 	{ ...getPct("Actual", p => p.percentOfAccount), modes: ["view"] },
 	{ ...getPct("Target", p => p.targetPct), modes: ["view"] },
-	{ ...getPct("Ratio", p => p.percentOfAccount && p.targetPct ? (100 * p.percentOfAccount / p.targetPct) : null, 1), modes: ["view", "trades"] },
+	{ ...getPct("Ratio", p => getRatio(p), 1), modes: ["view", "trades"] },
 	{
 		name: "Trade",
 		align: "c",
@@ -103,7 +103,8 @@ function Positions2(props) {
 	if (mode === "view") {
 		viewPositions = viewPositions.sort((a, b) => b.marketValue - a.marketValue);
 	} else if (mode === "trades") {
-		viewPositions = viewPositions.filter(p => p.sharesToBuy).sort((a, b) => (a.sharesToBuy * a.price) - (b.sharesToBuy * b.price));
+		// viewPositions = viewPositions.filter(p => p.sharesToBuy).sort((a, b) => (a.sharesToBuy * a.price) - (b.sharesToBuy * b.price));
+		viewPositions = viewPositions.filter(p => p.sharesToBuy).sort((a, b) => getRatio(b) - getRatio(a));
 	} else if (mode === "calls") {
 		viewPositions = viewPositions.filter(p => p.callsToSell).sort((a, b) => b.dayChangePct - a.dayChangePct);
 	}
@@ -140,6 +141,10 @@ function renderHeading(portfolio, mode, setMode, positions) {
 			<span>({positions.length})</span>
 		</div>
 	);
+}
+
+function getRatio(position) {
+	return position.percentOfAccount && position.targetPct ? (100 * position.percentOfAccount / position.targetPct) : null;
 }
 
 function copyClip(text) {

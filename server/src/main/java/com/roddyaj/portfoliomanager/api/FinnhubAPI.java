@@ -35,7 +35,7 @@ public class FinnhubAPI implements QuoteProvider
 	@Override
 	public Quote getQuote(String symbol) throws IOException
 	{
-		JsonNode json = request(symbol, "quote", null);
+		JsonNode json = request(symbol, "quote", Duration.ofMinutes(15));
 
 		double price = getDouble(json, "c");
 		double previousClose = getDouble(json, "pc");

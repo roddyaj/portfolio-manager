@@ -15,7 +15,7 @@ public class PositionsMonitor extends AbstractMonitor
 	@Override
 	protected Path getFile()
 	{
-		return getFile(accountName + ".*-Positions-.*\\.CSV",
+		return getFile(accountName + ".*-Positions-.*\\.csv",
 			(p1, p2) -> SchwabPositionsReader.getTime(p2).compareTo(SchwabPositionsReader.getTime(p1)));
 	}
 

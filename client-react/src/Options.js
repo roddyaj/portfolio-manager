@@ -20,7 +20,15 @@ function Options(props) {
 	const { portfolio, isLong, type } = props;
 	const { positions } = portfolio;
 
-	const optionPositions = positions.filter(p => p.symbol.includes(" ") && p.symbol.endsWith(type.charAt(0)) && ((!isLong && p.quantity < 0) || (isLong && p.quantity > 0)));
+	const optionPositions = positions
+		.filter(p => p.symbol.includes(" ") && p.symbol.endsWith(type.charAt(0)) && ((!isLong && p.quantity < 0) || (isLong && p.quantity > 0)))
+		.sort((a, b) => {
+			let value = a.dte - b.dte;
+			if (value === 0) {
+				value = a.symbol.localeCompare(b.symbol);
+			}
+			return value;
+		});
 
 	if (optionPositions.length === 0) {
 		return null;

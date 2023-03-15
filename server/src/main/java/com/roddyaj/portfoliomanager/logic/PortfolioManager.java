@@ -167,10 +167,32 @@ public final class PortfolioManager
 			output.setOpenBuyAmount(calculateOpenBuyAmount(orders));
 			output.setCashAvailable(output.getCash() - output.getCashOnHold() - output.getOpenBuyAmount());
 
-			output.setPutsToSell(Stream.of(settings.getOptionsInclude()).map(s -> {
-				return new PutToSell(s, symbolToPosition.containsKey(s) ? symbolToPosition.get(s).price() : null,
-					symbolToPosition.containsKey(s) ? symbolToPosition.get(s).dayChangePct() : null);
-			}).toList());
+			if (accountSettings.isOptionsEnabled())
+			{
+				output.setPutsToSell(Stream.of(settings.getOptionsInclude()).map(s -> {
+					Double price = null;
+					Double dayChange = null;
+					try
+					{
+						Quote quote;
+						if (symbolToPosition.containsKey(s))
+						{
+							price = symbolToPosition.get(s).price();
+							dayChange = symbolToPosition.get(s).dayChangePct();
+						}
+						else if ((quote = finnhubAPI.getQuote(s)) != null)
+						{
+							price = quote.price();
+							dayChange = quote.changePct();
+						}
+					}
+					catch (IOException e)
+					{
+						e.printStackTrace();
+					}
+					return new PutToSell(s, price, dayChange);
+				}).toList());
+			}
 
 			List<String> allSymbols = allPositions.stream().filter(p -> !p.isOption()).map(Position::getSymbol).toList();
 			state.setSymbolsToLookup(allSymbols);
@@ -222,7 +244,7 @@ public final class PortfolioManager
 		transaction.setAction(schwabTransaction.action());
 		transaction.setQuantity(schwabTransaction.quantity().doubleValue());
 		transaction.setPrice(schwabTransaction.price().doubleValue());
-		transaction.setAmount(schwabTransaction.amount().doubleValue());
+		transaction.setAmount(schwabTransaction.amount() != null ? schwabTransaction.amount().doubleValue() : 0);
 		if (schwabTransaction.isOption())
 		{
 			transaction.setStrike(schwabTransaction.option().strike());
@@ -288,13 +310,12 @@ public final class PortfolioManager
 		if (target != null)
 		{
 			double targetValue = accountBalance * target.doubleValue();
-			double delta = targetValue - position.getMarketValue();
-			int quantity = round(delta / position.getPrice(), .75);
-			boolean isBuy = quantity > 0;
+			int quantity = round((targetValue - position.getMarketValue()) / position.getPrice(), .75);
 			double orderAmount = Math.abs(quantity * position.getPrice());
 			Allocation allocation = accountSettings.getAllocation(position.getSymbol());
 			double positionMinOrder = allocation != null && allocation.getMinOrder() != null ? allocation.getMinOrder().doubleValue() : 0;
-			boolean doOrder = quantity != 0 && Math.abs(delta / targetValue) > (isBuy ? 0.005 : 0.01) && orderAmount >= accountSettings.getMinOrder()
+			double valuePct = position.getMarketValue() / targetValue;
+			boolean doOrder = quantity != 0 && (valuePct < .99 || valuePct > 1.01) && orderAmount >= accountSettings.getMinOrder()
 				&& orderAmount >= positionMinOrder;
 			if (doOrder)
 				sharesToBuy = quantity;
@@ -362,7 +383,7 @@ public final class PortfolioManager
 
 	private static double calculateReturn(AccountSettings accountSettings, Portfolio portfolio)
 	{
-		final LocalDate startDate = LocalDate.of(2022, 1, 1);
+		final LocalDate startDate = LocalDate.of(2023, 1, 1);
 
 		double A = accountSettings.getStartingBalance();
 		double B = portfolio.getPositions().balance();
