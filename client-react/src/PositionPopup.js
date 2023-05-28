@@ -67,14 +67,14 @@ function renderOpenOrders(position) {
 	if (!position.openOrders || !position.openOrders.length)
 		return null;
 
-	const sortedOrders = position.openOrders.sort((a, b) => b.limitPrice - a.limitPrice);
+	const sortedOrders = position.openOrders.sort((a, b) => b.limitPrice != null && a.limitPrice != null ? b.limitPrice - a.limitPrice : 0);
 	const rows = [];
 	rows.push(...sortedOrders.filter(o => o.action.startsWith('Sell')).map((order, i) => (
 		<tr key={`pospop-opensell-${position.symbol}-${i}`}>
 			<td>{order.action}</td>
 			<td>{order.quantity}</td>
 			<td>@</td>
-			<td>{order.strike ? order.strike.toFixed(2) : order.limitPrice.toFixed(2)}</td>
+			<td>{order.strike ? order.strike.toFixed(2) : (order.limitPrice != null ? order.limitPrice.toFixed(2) : "Market")}</td>
 		</tr>
 	)));
 	rows.push((
@@ -88,7 +88,7 @@ function renderOpenOrders(position) {
 			<td>{order.action}</td>
 			<td>{order.quantity}</td>
 			<td>@</td>
-			<td>{order.strike ? order.strike.toFixed(2) : order.limitPrice.toFixed(2)}</td>
+			<td>{order.strike ? order.strike.toFixed(2) : (order.limitPrice != null ? order.limitPrice.toFixed(2) : "Market")}</td>
 		</tr>
 	)));
 	return (
