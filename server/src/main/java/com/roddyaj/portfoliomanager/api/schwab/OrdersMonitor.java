@@ -1,4 +1,4 @@
-package com.roddyaj.portfoliomanager.schwab;
+package com.roddyaj.portfoliomanager.api.schwab;
 
 import java.nio.file.Path;
 
@@ -15,7 +15,7 @@ public class OrdersMonitor extends AbstractMonitor
 	@Override
 	protected Path getFile()
 	{
-		return getFile(accountNumber + " Order Details.*\\.csv", (p1, p2) -> SchwabOrdersReader.getTime(p2).compareTo(SchwabOrdersReader.getTime(p1)));
+		return getFile(accountName.replace('_', ' ') + "XXXX" + accountNumber.substring(4) + "_Order_Status_.*\\.csv", (p1, p2) -> SchwabOrdersReader.getTime(p2).compareTo(SchwabOrdersReader.getTime(p1)));
 	}
 
 	@Override

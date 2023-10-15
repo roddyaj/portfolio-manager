@@ -1,4 +1,4 @@
-package com.roddyaj.portfoliomanager.schwab;
+package com.roddyaj.portfoliomanager.api.schwab;
 
 import java.nio.file.Path;
 

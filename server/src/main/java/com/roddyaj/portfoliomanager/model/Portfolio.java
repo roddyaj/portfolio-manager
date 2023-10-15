@@ -1,23 +1,22 @@
 package com.roddyaj.portfoliomanager.model;
 
 import com.roddyaj.schwabparse.SchwabOrdersData;
-import com.roddyaj.schwabparse.SchwabPositionsData;
 import com.roddyaj.schwabparse.SchwabTransactionsData;
 
 public class Portfolio
 {
-	private SchwabPositionsData positions;
+	private InputPositions positions;
 
 	private SchwabTransactionsData transactions;
 
 	private SchwabOrdersData orders;
 
-	public SchwabPositionsData getPositions()
+	public InputPositions getPositions()
 	{
 		return positions;
 	}
 
-	public void setPositions(SchwabPositionsData positions)
+	public void setPositions(InputPositions positions)
 	{
 		this.positions = positions;
 	}

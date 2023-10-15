@@ -19,9 +19,14 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.fasterxml.jackson.databind.JsonNode;
-
 import com.roddyaj.portfoliomanager.api.FinnhubAPI;
 import com.roddyaj.portfoliomanager.api.SP500ReturnAPI;
+import com.roddyaj.portfoliomanager.api.schwab.AbstractMonitor;
+import com.roddyaj.portfoliomanager.api.schwab.OrdersMonitor;
+import com.roddyaj.portfoliomanager.api.schwab.PositionsMonitor;
+import com.roddyaj.portfoliomanager.api.schwab.TransactionsMonitor;
+import com.roddyaj.portfoliomanager.model.InputPosition;
+import com.roddyaj.portfoliomanager.model.InputPositions;
 import com.roddyaj.portfoliomanager.model.Message;
 import com.roddyaj.portfoliomanager.model.Portfolio;
 import com.roddyaj.portfoliomanager.model.Quote;
@@ -32,18 +37,12 @@ import com.roddyaj.portfoliomanager.output.Output;
 import com.roddyaj.portfoliomanager.output.Position;
 import com.roddyaj.portfoliomanager.output.PutToSell;
 import com.roddyaj.portfoliomanager.output.Transaction;
-import com.roddyaj.portfoliomanager.schwab.AbstractMonitor;
-import com.roddyaj.portfoliomanager.schwab.OrdersMonitor;
-import com.roddyaj.portfoliomanager.schwab.PositionsMonitor;
-import com.roddyaj.portfoliomanager.schwab.TransactionsMonitor;
 import com.roddyaj.portfoliomanager.settings.AccountSettings;
 import com.roddyaj.portfoliomanager.settings.Allocation;
 import com.roddyaj.portfoliomanager.settings.Api;
 import com.roddyaj.portfoliomanager.settings.Settings;
 import com.roddyaj.schwabparse.SchwabOrder;
 import com.roddyaj.schwabparse.SchwabOrdersData;
-import com.roddyaj.schwabparse.SchwabPosition;
-import com.roddyaj.schwabparse.SchwabPositionsData;
 import com.roddyaj.schwabparse.SchwabTransaction;
 import com.roddyaj.schwabparse.SchwabTransactionsData;
 
@@ -112,15 +111,15 @@ public final class PortfolioManager
 
 		State state = State.getInstance();
 
-		SchwabPositionsData positions = portfolio.getPositions();
+		InputPositions positions = portfolio.getPositions();
 		if (positions != null)
 		{
 			Instant portfolioTime = positions.time().toInstant();
 
-			Map<String, List<SchwabPosition>> symbolToOptions = positions.positions().stream().filter(SchwabPosition::isOption)
-				.collect(Collectors.groupingBy(SchwabPosition::getActualSymbol));
-			Map<String, SchwabPosition> symbolToPosition = positions.positions().stream().filter(p -> !p.isOption())
-				.collect(Collectors.toMap(SchwabPosition::symbol, Function.identity()));
+			Map<String, List<InputPosition>> symbolToOptions = positions.positions().stream().filter(InputPosition::isOption)
+				.collect(Collectors.groupingBy(InputPosition::actualSymbol));
+			Map<String, InputPosition> symbolToPosition = positions.positions().stream().filter(p -> !p.isOption())
+				.collect(Collectors.toMap(InputPosition::symbol, Function.identity()));
 
 			output.setBalance(positions.balance());
 			output.setCash(positions.cash());
@@ -208,31 +207,27 @@ public final class PortfolioManager
 		return output;
 	}
 
-	private static Position toPosition(SchwabPosition schwabPosition)
+	private static Position toPosition(InputPosition inputPosition)
 	{
 		Position position = new Position();
-		position.setSymbol(schwabPosition.symbol());
-		position.setDescription(schwabPosition.description());
-		position.setQuantity(schwabPosition.quantity().intValue());
-		position.setPrice(schwabPosition.price().doubleValue());
-		position.setMarketValue(schwabPosition.marketValue());
-		position.setCostBasis(schwabPosition.costBasis() != null ? schwabPosition.costBasis().doubleValue() : 0);
-		position.setDayChangePct(schwabPosition.dayChangePct() != null ? schwabPosition.dayChangePct().doubleValue() : 0);
-		position.setGainLossPct(schwabPosition.gainLossPct() != null ? schwabPosition.gainLossPct().doubleValue() : 0);
-		position.setPercentOfAccount(schwabPosition.percentOfAccount());
-		position.setDividendYield(schwabPosition.dividendYield());
-		position.setPeRatio(schwabPosition.peRatio());
-		position.set52WeekLow(schwabPosition._52WeekLow());
-		position.set52WeekHigh(schwabPosition._52WeekHigh());
-		if (schwabPosition.isOption())
+		position.setSymbol(inputPosition.symbol());
+		position.setDescription(inputPosition.description());
+		position.setQuantity((int)inputPosition.quantity());
+		position.setPrice(inputPosition.price());
+		position.setMarketValue(inputPosition.marketValue());
+		position.setCostBasis(inputPosition.costBasis());
+		position.setDayChangePct(inputPosition.dayChangePct());
+		position.setGainLossPct(inputPosition.getGainLossPct());
+		position.setPercentOfAccount(inputPosition.percentOfAccount());
+//		position.setDividendYield(inputPosition.dividendYield());
+//		position.setPeRatio(inputPosition.peRatio());
+//		position.set52WeekLow(inputPosition._52WeekLow());
+//		position.set52WeekHigh(inputPosition._52WeekHigh());
+		if (inputPosition.isOption())
 		{
-			LocalDate expiryDate = schwabPosition.option().expiryDate();
-			double strike = schwabPosition.option().strike();
-			String type = schwabPosition.option().type();
-			if (schwabPosition.intrinsicValue() != null)
-				position.setUnderlyingPrice(type.equals("P") ? strike - schwabPosition.intrinsicValue() : strike + schwabPosition.intrinsicValue());
-			position.setInTheMoney("ITM".equals(schwabPosition.inTheMoney()));
-			position.setDte((int)ChronoUnit.DAYS.between(LocalDate.now(), expiryDate));
+			position.setUnderlyingPrice(inputPosition.underlyingPrice());
+			position.setInTheMoney(inputPosition.inTheMoney());
+			position.setDte((int)ChronoUnit.DAYS.between(LocalDate.now(), inputPosition.expiryDate()));
 		}
 		return position;
 	}
@@ -269,11 +264,11 @@ public final class PortfolioManager
 		return order;
 	}
 
-	private List<Position> getNewPositions(List<? extends SchwabPosition> positions, SchwabOrdersData orders, AllocationMap allocationMap)
+	private List<Position> getNewPositions(List<? extends InputPosition> positions, SchwabOrdersData orders, AllocationMap allocationMap)
 	{
 		List<Position> newPositions = new ArrayList<>();
 
-		Set<String> positionSymbols = positions.stream().map(SchwabPosition::symbol).collect(Collectors.toSet());
+		Set<String> positionSymbols = positions.stream().map(InputPosition::symbol).collect(Collectors.toSet());
 		Set<String> buySymbols = orders != null
 			? orders.getOpenOrders().stream().filter(o -> "Buy".equals(o.action())).map(SchwabOrder::symbol).collect(Collectors.toSet())
 			: Set.of();
@@ -383,6 +378,9 @@ public final class PortfolioManager
 
 	private static double calculateReturn(AccountSettings accountSettings, Portfolio portfolio)
 	{
+		if (portfolio.getTransactions() == null)
+			return 0;
+
 		final LocalDate startDate = LocalDate.of(2023, 1, 1);
 
 		double A = accountSettings.getStartingBalance();

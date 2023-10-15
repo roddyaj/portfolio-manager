@@ -1,4 +1,4 @@
-package com.roddyaj.portfoliomanager.schwab;
+package com.roddyaj.portfoliomanager.api.schwab;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -12,7 +12,7 @@ import com.roddyaj.portfoliomanager.model.Portfolio;
 
 public abstract class AbstractMonitor
 {
-	private final Path dir;
+	protected final Path dir;
 
 	protected final String accountName;
 
@@ -43,6 +43,7 @@ public abstract class AbstractMonitor
 				dirLastModified = lastModified;
 
 				Path file = getFile();
+				System.out.println(file);
 				if (file != null && !file.equals(this.file))
 				{
 					this.file = file;
