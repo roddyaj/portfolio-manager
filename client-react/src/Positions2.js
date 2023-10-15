@@ -97,7 +97,7 @@ const columns = [
 function Positions2(props) {
 	const { portfolio } = props;
 
-	const [mode, setMode] = useState("view");
+	const [mode, setMode] = useState("trades");
 
 	let viewPositions = portfolio.positions.filter(p => !p.symbol.includes(" "));
 	if (mode === "view") {
