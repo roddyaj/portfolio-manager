@@ -6,7 +6,7 @@ export function renderPositionPopup(position) {
 			<Popover.Header as="h3">{position.symbol} - {position.description}</Popover.Header>
 			<Popover.Body>
 				{renderPriceInfo(position)}
-				{renderStatistics(position)}
+				{/* {renderStatistics(position)} */}
 				{renderOpenOrders(position)}
 				{renderOptions(position)}
 				{renderTransactions(position)}
@@ -69,7 +69,7 @@ function renderOpenOrders(position) {
 
 	const sortedOrders = position.openOrders.sort((a, b) => b.limitPrice != null && a.limitPrice != null ? b.limitPrice - a.limitPrice : 0);
 	const rows = [];
-	rows.push(...sortedOrders.filter(o => o.action.startsWith('Sell')).map((order, i) => (
+	rows.push(...sortedOrders.filter(o => o.action.startsWith('SELL')).map((order, i) => (
 		<tr key={`pospop-opensell-${position.symbol}-${i}`}>
 			<td>{order.action}</td>
 			<td>{order.quantity}</td>
@@ -83,7 +83,7 @@ function renderOpenOrders(position) {
 			<td>{position.price.toFixed(2)}</td>
 		</tr>
 	));
-	rows.push(...sortedOrders.filter(o => o.action.startsWith('Buy')).map((order, i) => (
+	rows.push(...sortedOrders.filter(o => o.action.startsWith('BUY')).map((order, i) => (
 		<tr key={`pospop-openbuy-${position.symbol}-${i}`}>
 			<td>{order.action}</td>
 			<td>{order.quantity}</td>
@@ -136,7 +136,7 @@ function renderTransactions(position) {
 		return null;
 
 	const rows = position.transactions.slice(0, 10).map((transaction, i) => {
-		const action = transaction.action.replace("to Open", transaction.type === "C" ? "Call" : "Put");
+		const action = transaction.action.replace("_TO_OPEN", transaction.type === "C" ? " Call" : " Put");
 		return (
 			<tr key={`pospop-transaction-${position.symbol}-${i}`}>
 				<td>{transaction.date}</td>

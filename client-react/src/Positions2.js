@@ -68,17 +68,17 @@ const columns = [
 			const isOption = r.tableState.mode === "calls";
 			const action = r.record.sharesToBuy > 0 ? "Buy" : "Sell";
 			const relevantOpenOrders = r.record.openOrders ? r.record.openOrders.filter(o => o.option === isOption) : [];
-			const openBuyCount = relevantOpenOrders.filter(o => o.action.startsWith("Buy")).map(o => o.quantity).reduce((tot, cur) => tot + cur, 0);
-			const openSellCount = relevantOpenOrders.filter(o => o.action.startsWith("Sell")).map(o => o.quantity).reduce((tot, cur) => tot + cur, 0);
+			const openBuyCount = relevantOpenOrders.filter(o => o.action.startsWith("BUY")).map(o => o.quantity).reduce((tot, cur) => tot + cur, 0);
+			const openSellCount = relevantOpenOrders.filter(o => o.action.startsWith("SELL")).map(o => o.quantity).reduce((tot, cur) => tot + cur, 0);
 			const openOrderArray = [['B', openBuyCount], ['S', openSellCount]].filter(a => a[1] !== 0);
 			const openOrderText = r.tableState.mode === "view"
 				? openOrderArray.map(a => a.join(" ")).join(", ")
 				: openOrderArray.filter(a => a[0] === action.charAt(0)).map(a => a[1]).join("");
-			return (
+			return openOrderText ? (
 				<td key={r.key} className={r.column.align}>
 					<a href="https://client.schwab.com/Trade/OrderStatus/ViewOrderStatus.aspx?ViewTypeFilter=Open">{openOrderText}</a>
 				</td>
-			)
+			) : "";
 		}
 	},
 	{ ...getAmount("Amount", p => p.sharesToBuy * p.price), sortDirection: 1, modes: ["trades"] },
@@ -99,7 +99,7 @@ function Positions2(props) {
 
 	const [mode, setMode] = useState("trades");
 
-	let viewPositions = portfolio.positions.filter(p => !p.symbol.includes(" "));
+	let viewPositions = portfolio.positions.filter(p => !p.	option);
 	if (mode === "view") {
 		viewPositions = viewPositions.sort((a, b) => b.marketValue - a.marketValue);
 	} else if (mode === "trades") {

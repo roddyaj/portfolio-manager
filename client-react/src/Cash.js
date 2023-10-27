@@ -1,7 +1,7 @@
 function Cash(props) {
 	const { portfolio } = props;
 
-	const positions = portfolio.positions.filter(p => !p.symbol.includes(" "));
+	const positions = portfolio.positions.filter(p => !p.option);
 	const sellTotal = positions.filter(p => p.sharesToBuy < 0).map(p => p.sharesToBuy * p.price).reduce((a, b) => a + b, 0);
 	const buyTotal = positions.filter(p => p.sharesToBuy > 0).map(p => p.sharesToBuy * p.price).reduce((a, b) => a + b, 0);
 

@@ -34,6 +34,10 @@ public class Position
 	private Double underlyingPrice;
 	private Boolean inTheMoney;
 	private Integer dte;
+	private String optionExpiry;
+	private String optionType;
+	private Double optionStrike;
+	private boolean option;
 //	String securityType;
 
 	private String logo;
@@ -205,9 +209,45 @@ public class Position
 		this.dte = dte;
 	}
 
+	public String getOptionExpiry()
+	{
+		return optionExpiry;
+	}
+
+	public void setOptionExpiry(String optionExpiry)
+	{
+		this.optionExpiry = optionExpiry;
+	}
+
+	public String getOptionType()
+	{
+		return optionType;
+	}
+
+	public void setOptionType(String optionType)
+	{
+		this.optionType = optionType;
+	}
+
+	public Double getOptionStrike()
+	{
+		return optionStrike;
+	}
+
+	public void setOptionStrike(Double optionStrike)
+	{
+		this.optionStrike = optionStrike;
+	}
+
 	public boolean isOption()
 	{
-		return symbol.indexOf(' ') != -1;
+//		return symbol.indexOf(' ') != -1;
+		return option;
+	}
+
+	public void setOption(boolean option)
+	{
+		this.option = option;
 	}
 
 	public String getLogo()

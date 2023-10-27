@@ -2,10 +2,10 @@ import DataTable from './DataTable';
 import { getAmount, getLink } from "./tableUtils";
 
 const columns = [
-	getLink("Ticker", p => p.symbol.split(" ")[0], r => `https://finance.yahoo.com/quote/${r.value}`),
+	getLink("Ticker", p => p.symbol, r => `https://finance.yahoo.com/quote/${r.value}`),
 	{ name: "#", align: "r", getValue: p => Math.abs(p.quantity), sortDirection: -1 },
-	{ name: "Expiry", align: "c", getValue: p => `${p.symbol.split(" ")[1]} (${p.dte})`, sortDirection: 1 },
-	getAmount("Strike", p => Number(p.symbol.split(" ")[2])),
+	{ name: "Expiry", align: "c", getValue: p => `${p.optionExpiry} (${p.dte})`, sortDirection: 1 },
+	getAmount("Strike", p => p.optionStrike),
 	getAmount("Price", p => p.underlyingPrice),
 	{
 		name: "ITM",
@@ -21,7 +21,7 @@ function Options(props) {
 	const { positions } = portfolio;
 
 	const optionPositions = positions
-		.filter(p => p.symbol.includes(" ") && p.symbol.endsWith(type.charAt(0)) && ((!isLong && p.quantity < 0) || (isLong && p.quantity > 0)))
+		.filter(p => p.option && p.optionType.startsWith(type.charAt(0)) && ((!isLong && p.quantity < 0) || (isLong && p.quantity > 0)))
 		.sort((a, b) => {
 			let value = a.dte - b.dte;
 			if (value === 0) {
