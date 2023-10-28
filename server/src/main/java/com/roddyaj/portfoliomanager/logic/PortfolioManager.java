@@ -20,14 +20,15 @@ import java.util.stream.Stream;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.roddyaj.portfoliomanager.api.FinnhubAPI;
+import com.roddyaj.portfoliomanager.api.PortfolioReader;
 import com.roddyaj.portfoliomanager.api.SP500ReturnAPI;
 import com.roddyaj.portfoliomanager.api.fidelity.FidelityPortfolioReader;
 import com.roddyaj.portfoliomanager.api.schwab.SchwabPortfolioReader;
 import com.roddyaj.portfoliomanager.model.Message;
+import com.roddyaj.portfoliomanager.model.Order.TransactionType;
+import com.roddyaj.portfoliomanager.model.Portfolio;
 import com.roddyaj.portfoliomanager.model.Quote;
 import com.roddyaj.portfoliomanager.model.State;
-import com.roddyaj.portfoliomanager.model2.Order.TransactionType;
-import com.roddyaj.portfoliomanager.model2.Portfolio;
 import com.roddyaj.portfoliomanager.output.MonthlyIncome;
 import com.roddyaj.portfoliomanager.output.Order;
 import com.roddyaj.portfoliomanager.output.Output;
@@ -60,15 +61,10 @@ public final class PortfolioManager
 			.findAny().orElse(null);
 		AccountSettings accountSettings = settings.getAccount(accountName);
 
-		Portfolio portfolio = accountNumber.length() == 9 ?
-			new FidelityPortfolioReader().read(inputDir, accountName, accountNumber) :
-			new SchwabPortfolioReader().read(inputDir, accountName, accountNumber);
-		boolean anyUpdated = true;
+		PortfolioReader reader = accountNumber.length() == 9 ? new FidelityPortfolioReader() : new SchwabPortfolioReader();
+		Portfolio portfolio = reader.read(inputDir, accountName, accountNumber);
 
-		Output output = null;
-		if (anyUpdated)
-			output = createOutput(accountName, settings, accountSettings, portfolio);
-
+		Output output = createOutput(accountName, settings, accountSettings, portfolio);
 		return output;
 	}
 
@@ -78,14 +74,12 @@ public final class PortfolioManager
 		output.setAccountName(accountName);
 		output.setOptionsEnabled(accountSettings.isOptionsEnabled());
 
-		// What to filter out here?
-		Map<String, List<com.roddyaj.portfoliomanager.model2.Order>> symbolToTransactions = portfolio.transactions().stream()
+		Map<String, List<com.roddyaj.portfoliomanager.model.Order>> symbolToTransactions = portfolio.transactions().stream()
 			.filter(t -> t.symbol() != null && t.transactionType() != null)
-			.collect(Collectors.groupingBy(com.roddyaj.portfoliomanager.model2.Order::symbol));
+			.collect(Collectors.groupingBy(com.roddyaj.portfoliomanager.model.Order::symbol));
 
-		// What to filter out here?
-		Map<String, List<com.roddyaj.portfoliomanager.model2.Order>> symbolToOrders = portfolio.openOrders().stream()
-			.collect(Collectors.groupingBy(com.roddyaj.portfoliomanager.model2.Order::symbol));
+		Map<String, List<com.roddyaj.portfoliomanager.model.Order>> symbolToOrders = portfolio.openOrders().stream()
+			.collect(Collectors.groupingBy(com.roddyaj.portfoliomanager.model.Order::symbol));
 
 		List<Message> messages = new ArrayList<>();
 		AllocationMap allocationMap = new AllocationMap(accountSettings.getAllocations(), messages);
@@ -94,11 +88,11 @@ public final class PortfolioManager
 
 		Instant portfolioTime = portfolio.time().toInstant();
 
-		Map<String, List<com.roddyaj.portfoliomanager.model2.Position>> symbolToOptions = portfolio.positions().stream()
-			.filter(com.roddyaj.portfoliomanager.model2.Position::isOption)
-			.collect(Collectors.groupingBy(com.roddyaj.portfoliomanager.model2.Position::symbol));
-		Map<String, com.roddyaj.portfoliomanager.model2.Position> symbolToPosition = portfolio.positions().stream().filter(p -> !p.isOption())
-			.collect(Collectors.toMap(com.roddyaj.portfoliomanager.model2.Position::symbol, Function.identity()));
+		Map<String, List<com.roddyaj.portfoliomanager.model.Position>> symbolToOptions = portfolio.positions().stream()
+			.filter(com.roddyaj.portfoliomanager.model.Position::isOption)
+			.collect(Collectors.groupingBy(com.roddyaj.portfoliomanager.model.Position::symbol));
+		Map<String, com.roddyaj.portfoliomanager.model.Position> symbolToPosition = portfolio.positions().stream().filter(p -> !p.isOption())
+			.collect(Collectors.toMap(com.roddyaj.portfoliomanager.model.Position::symbol, Function.identity()));
 
 		output.setBalance(portfolio.balance());
 		output.setCash(portfolio.cash());
@@ -184,7 +178,7 @@ public final class PortfolioManager
 		return output;
 	}
 
-	private static Position toPosition(com.roddyaj.portfoliomanager.model2.Position inputPosition)
+	private static Position toPosition(com.roddyaj.portfoliomanager.model.Position inputPosition)
 	{
 		Position position = new Position();
 		position.setSymbol(inputPosition.symbol());
@@ -209,7 +203,7 @@ public final class PortfolioManager
 		return position;
 	}
 
-	private static Transaction toTransaction(com.roddyaj.portfoliomanager.model2.Order schwabTransaction)
+	private static Transaction toTransaction(com.roddyaj.portfoliomanager.model.Order schwabTransaction)
 	{
 		Transaction transaction = new Transaction();
 		transaction.setDate(schwabTransaction.date().toString());
@@ -225,7 +219,7 @@ public final class PortfolioManager
 		return transaction;
 	}
 
-	private static Order toOrder(com.roddyaj.portfoliomanager.model2.Order schwabOrder)
+	private static Order toOrder(com.roddyaj.portfoliomanager.model.Order schwabOrder)
 	{
 		Order order = new Order();
 		order.setAction(schwabOrder.transactionType().toString());
@@ -245,10 +239,10 @@ public final class PortfolioManager
 	{
 		List<Position> newPositions = new ArrayList<>();
 
-		Set<String> positionSymbols = portfolio.positions().stream().map(com.roddyaj.portfoliomanager.model2.Position::symbol)
+		Set<String> positionSymbols = portfolio.positions().stream().map(com.roddyaj.portfoliomanager.model.Position::symbol)
 			.collect(Collectors.toSet());
 		Set<String> buySymbols = portfolio.openOrders().stream().filter(o -> o.transactionType() == TransactionType.BUY)
-			.map(com.roddyaj.portfoliomanager.model2.Order::symbol).collect(Collectors.toSet());
+			.map(com.roddyaj.portfoliomanager.model.Order::symbol).collect(Collectors.toSet());
 		Set<String> newSymbols = new HashSet<>();
 		newSymbols.addAll(allocationMap.getSymbols());
 		newSymbols.addAll(buySymbols);
@@ -310,7 +304,7 @@ public final class PortfolioManager
 		return availableCalls;
 	}
 
-	private static List<MonthlyIncome> calculateIncome(Collection<? extends com.roddyaj.portfoliomanager.model2.Order> transactions)
+	private static List<MonthlyIncome> calculateIncome(Collection<? extends com.roddyaj.portfoliomanager.model.Order> transactions)
 	{
 		List<MonthlyIncome> monthlyIncome = new ArrayList<>();
 
@@ -318,7 +312,7 @@ public final class PortfolioManager
 		Map<String, Double> monthToOptionsIncome = new HashMap<>();
 		Map<String, Double> monthToDividendIncome = new HashMap<>();
 		Map<String, Double> monthToContributions = new HashMap<>();
-		for (com.roddyaj.portfoliomanager.model2.Order transaction : transactions)
+		for (com.roddyaj.portfoliomanager.model.Order transaction : transactions)
 		{
 			TransactionType action = transaction.transactionType();
 			if (action != null)
@@ -362,15 +356,15 @@ public final class PortfolioManager
 
 		double A = accountSettings.getStartingBalance();
 		double B = portfolio.balance();
-		List<com.roddyaj.portfoliomanager.model2.Order> transfers = portfolio.transactions().stream()
+		List<com.roddyaj.portfoliomanager.model.Order> transfers = portfolio.transactions().stream()
 			.filter(t -> t.transactionType() == TransactionType.TRANSFER && !t.date().isBefore(startDate)).toList();
-		double F = transfers.stream().mapToDouble(com.roddyaj.portfoliomanager.model2.Order::getAmount).sum();
+		double F = transfers.stream().mapToDouble(com.roddyaj.portfoliomanager.model.Order::getAmount).sum();
 		double weightedF = transfers.stream().mapToDouble(t -> getWeight(t, startDate) * t.getAmount()).sum();
 		double R = (B - A - F) / (A + weightedF);
 		return R;
 	}
 
-	private static double getWeight(com.roddyaj.portfoliomanager.model2.Order transaction, LocalDate startDate)
+	private static double getWeight(com.roddyaj.portfoliomanager.model.Order transaction, LocalDate startDate)
 	{
 		long C = 365;
 		long D = ChronoUnit.DAYS.between(startDate, transaction.date());
@@ -384,7 +378,7 @@ public final class PortfolioManager
 			.mapToDouble(p -> Double.parseDouble(p.getSymbol().split(" ")[2]) * Math.abs(p.getQuantity())).sum() * 100;
 	}
 
-	private static double calculateOpenBuyAmount(Collection<? extends com.roddyaj.portfoliomanager.model2.Order> orders)
+	private static double calculateOpenBuyAmount(Collection<? extends com.roddyaj.portfoliomanager.model.Order> orders)
 	{
 		return orders.stream().filter(o -> o.transactionType() == TransactionType.BUY).mapToDouble(o -> o.getAmount()).sum();
 	}

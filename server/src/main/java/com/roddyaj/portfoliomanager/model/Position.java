@@ -1,4 +1,4 @@
-package com.roddyaj.portfoliomanager.model2;
+package com.roddyaj.portfoliomanager.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;

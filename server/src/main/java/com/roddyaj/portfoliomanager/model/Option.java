@@ -1,4 +1,4 @@
-package com.roddyaj.portfoliomanager.model2;
+package com.roddyaj.portfoliomanager.model;
 
 import java.time.LocalDate;
 

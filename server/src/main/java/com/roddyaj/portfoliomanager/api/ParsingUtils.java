@@ -1,23 +1,79 @@
-package com.roddyaj.portfoliomanager.api.schwab2;
+package com.roddyaj.portfoliomanager.api;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 
-public final class Utils
+public final class ParsingUtils
 {
 	private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("M/d/yyyy");
+
+	public static LocalDateTime getFileTime(Path file)
+	{
+		LocalDateTime time = null;
+		try
+		{
+			time = LocalDateTime.ofInstant(Files.getLastModifiedTime(file).toInstant(), ZoneId.systemDefault());
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+		}
+		return time;
+	}
+
+	public static Path getFile(Path dir, String pattern, Comparator<? super Path> comparator)
+	{
+		Path file = null;
+		List<Path> files = list(dir, pattern).sorted(comparator).toList();
+		if (!files.isEmpty())
+		{
+			file = files.get(0);
+			for (int i = 1; i < files.size(); i++)
+			{
+				try
+				{
+					Files.delete(files.get(i));
+				}
+				catch (IOException e)
+				{
+					e.printStackTrace();
+				}
+			}
+		}
+		return file;
+	}
+
+	public static Stream<Path> list(Path dir, String pattern)
+	{
+		if (Files.exists(dir))
+		{
+			try
+			{
+				return Files.list(dir).filter(p -> p.getFileName().toString().matches(pattern));
+			}
+			catch (IOException e)
+			{
+				e.printStackTrace();
+			}
+		}
+		return Stream.empty();
+	}
 
 	public static List<CSVRecord> readCsv(Path path, int headerLine)
 	{
@@ -25,7 +81,8 @@ public final class Utils
 		try
 		{
 			lines = Files.readAllLines(path);
-			lines = lines.subList(headerLine, lines.size());
+			if (headerLine > 0)
+				lines = lines.subList(headerLine, lines.size());
 		}
 		catch (IOException e)
 		{
@@ -149,7 +206,7 @@ public final class Utils
 
 	private static boolean isPresent(String value)
 	{
-		return !(value == null || value.isBlank() || "--".equals(value) || "N/A".equals(value));
+		return !(value == null || value.isBlank() || "--".equals(value) || "N/A".equalsIgnoreCase(value));
 	}
 
 	private static String sanitize(String value)
@@ -157,7 +214,7 @@ public final class Utils
 		return value.replace(",", "").replace("$", "").replace("%", "");
 	}
 
-	private Utils()
+	private ParsingUtils()
 	{
 	}
 }
