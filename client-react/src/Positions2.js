@@ -67,9 +67,9 @@ const columns = [
 		render: r => {
 			const isOption = r.tableState.mode === "calls";
 			const action = r.record.sharesToBuy > 0 ? "Buy" : "Sell";
-			const relevantOpenOrders = r.record.openOrders ? r.record.openOrders.filter(o => o.option === isOption) : [];
-			const openBuyCount = relevantOpenOrders.filter(o => o.action.startsWith("BUY")).map(o => o.quantity).reduce((tot, cur) => tot + cur, 0);
-			const openSellCount = relevantOpenOrders.filter(o => o.action.startsWith("SELL")).map(o => o.quantity).reduce((tot, cur) => tot + cur, 0);
+			const relevantOpenOrders = r.record.openOrders ? r.record.openOrders.filter(o => !!o.option === isOption) : [];
+			const openBuyCount = relevantOpenOrders.filter(o => o.transactionType.startsWith("BUY")).map(o => o.quantity).reduce((tot, cur) => tot + cur, 0);
+			const openSellCount = relevantOpenOrders.filter(o => o.transactionType.startsWith("SELL")).map(o => o.quantity).reduce((tot, cur) => tot + cur, 0);
 			const openOrderArray = [['B', openBuyCount], ['S', openSellCount]].filter(a => a[1] !== 0);
 			const openOrderText = r.tableState.mode === "view"
 				? openOrderArray.map(a => a.join(" ")).join(", ")

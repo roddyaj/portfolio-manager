@@ -14,11 +14,6 @@ public record Order(String symbol, TransactionType transactionType, double quant
 		return quantity * price;
 	}
 
-	public boolean isOption()
-	{
-		return option != null;
-	}
-
 	public enum TransactionType
 	{
 		BUY,

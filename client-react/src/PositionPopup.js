@@ -67,14 +67,14 @@ function renderOpenOrders(position) {
 	if (!position.openOrders || !position.openOrders.length)
 		return null;
 
-	const sortedOrders = position.openOrders.sort((a, b) => b.limitPrice != null && a.limitPrice != null ? b.limitPrice - a.limitPrice : 0);
+	const sortedOrders = position.openOrders.sort((a, b) => b.price != null && a.price != null ? b.price - a.price : 0);
 	const rows = [];
-	rows.push(...sortedOrders.filter(o => o.action.startsWith('SELL')).map((order, i) => (
+	rows.push(...sortedOrders.filter(o => o.transactionType.startsWith("SELL")).map((order, i) => (
 		<tr key={`pospop-opensell-${position.symbol}-${i}`}>
-			<td>{order.action}</td>
+			<td>{order.transactionType}</td>
 			<td>{order.quantity}</td>
 			<td>@</td>
-			<td>{order.strike ? order.strike.toFixed(2) : (order.limitPrice != null ? order.limitPrice.toFixed(2) : "Market")}</td>
+			<td>{order.option?.strike ? order.option.strike.toFixed(2) : (order.price != null ? order.price.toFixed(2) : "Market")}</td>
 		</tr>
 	)));
 	rows.push((
@@ -83,12 +83,12 @@ function renderOpenOrders(position) {
 			<td>{position.price.toFixed(2)}</td>
 		</tr>
 	));
-	rows.push(...sortedOrders.filter(o => o.action.startsWith('BUY')).map((order, i) => (
+	rows.push(...sortedOrders.filter(o => o.transactionType.startsWith("BUY")).map((order, i) => (
 		<tr key={`pospop-openbuy-${position.symbol}-${i}`}>
-			<td>{order.action}</td>
+			<td>{order.transactionType}</td>
 			<td>{order.quantity}</td>
 			<td>@</td>
-			<td>{order.strike ? order.strike.toFixed(2) : (order.limitPrice != null ? order.limitPrice.toFixed(2) : "Market")}</td>
+			<td>{order.option?.strike ? order.option.strike.toFixed(2) : (order.price != null ? order.price.toFixed(2) : "Market")}</td>
 		</tr>
 	)));
 	return (
@@ -108,13 +108,12 @@ function renderOptions(position) {
 		return null;
 
 	const rows = position.options.filter(o => o.quantity < 0).map((option, i) => {
-		const [symbol, expiry, strike, type] = option.symbol.split(" ");
 		return (
-			<tr key={`pospop-option-${symbol}-${i}`}>
+			<tr key={`pospop-option-${option.symbol}-${i}`}>
 				<td>{Math.abs(option.quantity)}</td>
-				<td>{type}</td>
-				<td>{expiry}</td>
-				<td>{strike}</td>
+				<td>{option.optionType}</td>
+				<td>{option.optionExpiry}</td>
+				<td>{option.optionStrike.toFixed(2)}</td>
 			</tr>
 		);
 	});
