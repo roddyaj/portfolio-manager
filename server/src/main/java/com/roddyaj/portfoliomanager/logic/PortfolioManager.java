@@ -25,14 +25,16 @@ import com.roddyaj.portfoliomanager.api.SP500ReturnAPI;
 import com.roddyaj.portfoliomanager.api.fidelity.FidelityPortfolioReader;
 import com.roddyaj.portfoliomanager.api.schwab.SchwabPortfolioReader;
 import com.roddyaj.portfoliomanager.model.Message;
+import com.roddyaj.portfoliomanager.model.Option.Type;
 import com.roddyaj.portfoliomanager.model.Order;
 import com.roddyaj.portfoliomanager.model.Order.TransactionType;
 import com.roddyaj.portfoliomanager.model.Portfolio;
+import com.roddyaj.portfoliomanager.model.Position;
 import com.roddyaj.portfoliomanager.model.Quote;
 import com.roddyaj.portfoliomanager.model.State;
 import com.roddyaj.portfoliomanager.output.MonthlyIncome;
 import com.roddyaj.portfoliomanager.output.Output;
-import com.roddyaj.portfoliomanager.output.Position;
+import com.roddyaj.portfoliomanager.output.OutputPosition;
 import com.roddyaj.portfoliomanager.output.PutToSell;
 import com.roddyaj.portfoliomanager.settings.AccountSettings;
 import com.roddyaj.portfoliomanager.settings.Allocation;
@@ -85,26 +87,25 @@ public final class PortfolioManager
 
 		Instant portfolioTime = portfolio.time().toInstant();
 
-		Map<String, List<com.roddyaj.portfoliomanager.model.Position>> symbolToOptions = portfolio.positions().stream()
-			.filter(com.roddyaj.portfoliomanager.model.Position::isOption)
-			.collect(Collectors.groupingBy(com.roddyaj.portfoliomanager.model.Position::symbol));
-		Map<String, com.roddyaj.portfoliomanager.model.Position> symbolToPosition = portfolio.positions().stream().filter(p -> !p.isOption())
-			.collect(Collectors.toMap(com.roddyaj.portfoliomanager.model.Position::symbol, Function.identity()));
+		Map<String, List<Position>> symbolToOptions = portfolio.positions().stream().filter(p -> p.option() != null)
+			.collect(Collectors.groupingBy(Position::symbol));
+		Map<String, Position> symbolToPosition = portfolio.positions().stream().filter(p -> p.option() == null)
+			.collect(Collectors.toMap(Position::symbol, Function.identity()));
 
 		output.setBalance(portfolio.balance());
 		output.setCash(portfolio.cash());
 		output.setPortfolioReturn(calculateReturn(accountSettings, portfolio));
 		output.setPositionsTime(portfolio.time().toEpochSecond() * 1000);
 
-		List<Position> allPositions = new ArrayList<>();
+		List<OutputPosition> allPositions = new ArrayList<>();
 		allPositions.addAll(portfolio.positions().stream().map(PortfolioManager::toPosition).toList());
 		allPositions.addAll(getNewPositions(portfolio, allocationMap));
-		for (Position position : allPositions)
+		for (OutputPosition position : allPositions)
 		{
 			String symbol = position.getSymbol();
 			position.setTransactions(symbolToTransactions.getOrDefault(symbol, List.of()));
 			position.setOpenOrders(symbolToOrders.getOrDefault(symbol, List.of()));
-			position.setOptions(symbolToOptions.getOrDefault(symbol, List.of()).stream().map(PortfolioManager::toPosition).toList());
+			position.setOptions(symbolToOptions.getOrDefault(symbol, List.of()));
 
 			Quote quote = state.getQuote(symbol);
 			if (quote != null && (quote.time().isAfter(portfolioTime) || position.getQuantity() == 0))
@@ -163,7 +164,7 @@ public final class PortfolioManager
 			}).toList());
 		}
 
-		List<String> allSymbols = allPositions.stream().filter(p -> !p.isOption()).map(Position::getSymbol).toList();
+		List<String> allSymbols = allPositions.stream().filter(p -> !p.isOption()).map(OutputPosition::getSymbol).toList();
 		state.setSymbolsToLookup(allSymbols);
 
 		output.setIncome(calculateIncome(portfolio.transactions()));
@@ -175,9 +176,9 @@ public final class PortfolioManager
 		return output;
 	}
 
-	private static Position toPosition(com.roddyaj.portfoliomanager.model.Position inputPosition)
+	private static OutputPosition toPosition(Position inputPosition)
 	{
-		Position position = new Position();
+		OutputPosition position = new OutputPosition();
 		position.setSymbol(inputPosition.symbol());
 		position.setDescription(inputPosition.description());
 		position.setQuantity((int)inputPosition.quantity());
@@ -187,7 +188,7 @@ public final class PortfolioManager
 		position.setDayChangePct(inputPosition.dayChangePct());
 		position.setGainLossPct(inputPosition.getGainLossPct());
 		position.setPercentOfAccount(inputPosition.percentOfAccount());
-		if (inputPosition.isOption())
+		if (inputPosition.option() != null)
 		{
 			position.setUnderlyingPrice(inputPosition.option().getUnderlyingPrice());
 			position.setInTheMoney(inputPosition.option().inTheMoney());
@@ -200,12 +201,11 @@ public final class PortfolioManager
 		return position;
 	}
 
-	private List<Position> getNewPositions(Portfolio portfolio, AllocationMap allocationMap)
+	private List<OutputPosition> getNewPositions(Portfolio portfolio, AllocationMap allocationMap)
 	{
-		List<Position> newPositions = new ArrayList<>();
+		List<OutputPosition> newPositions = new ArrayList<>();
 
-		Set<String> positionSymbols = portfolio.positions().stream().map(com.roddyaj.portfoliomanager.model.Position::symbol)
-			.collect(Collectors.toSet());
+		Set<String> positionSymbols = portfolio.positions().stream().map(Position::symbol).collect(Collectors.toSet());
 		Set<String> buySymbols = portfolio.openOrders().stream().filter(o -> o.transactionType() == TransactionType.BUY).map(Order::symbol)
 			.collect(Collectors.toSet());
 		Set<String> newSymbols = new HashSet<>();
@@ -215,7 +215,7 @@ public final class PortfolioManager
 
 		for (String symbol : newSymbols)
 		{
-			Position position = new Position();
+			OutputPosition position = new OutputPosition();
 			position.setSymbol(symbol);
 			double price = 1;
 			try
@@ -235,7 +235,7 @@ public final class PortfolioManager
 		return newPositions;
 	}
 
-	private static Integer calculateSharesToBuy(Position position, AccountSettings accountSettings, double accountBalance, Double target)
+	private static Integer calculateSharesToBuy(OutputPosition position, AccountSettings accountSettings, double accountBalance, Double target)
 	{
 		Integer sharesToBuy = null;
 		if (target != null)
@@ -254,14 +254,15 @@ public final class PortfolioManager
 		return sharesToBuy;
 	}
 
-	private static Integer calculateCallsToSell(Position position, Settings settings, AccountSettings accountSettings)
+	private static Integer calculateCallsToSell(OutputPosition position, Settings settings, AccountSettings accountSettings)
 	{
 		Integer availableCalls = null;
 		if (accountSettings.isOptionsEnabled() && !position.isOption() && position.getQuantity() >= 100
 			&& !settings.excludeOption(position.getSymbol()))
 		{
-			int totalCallsSold = position.getOptions() != null ? Math.abs(
-				position.getOptions().stream().filter(o -> o.getOptionType().equals("CALL") && o.getQuantity() < 0).mapToInt(Position::getQuantity).sum())
+			int totalCallsSold = position.getOptions() != null
+				? Math.abs(position.getOptions().stream().filter(o -> o.option().type() == Type.CALL && o.quantity() < 0)
+					.mapToInt(o -> (int)o.quantity()).sum())
 				: 0;
 			int availableShares = position.getQuantity() - totalCallsSold * 100;
 			availableCalls = (int)Math.floor(availableShares / 100.0);
@@ -337,7 +338,7 @@ public final class PortfolioManager
 		return W;
 	}
 
-	private static double calculateCashOnHold(Collection<? extends Position> positions)
+	private static double calculateCashOnHold(Collection<? extends OutputPosition> positions)
 	{
 		return positions.stream().filter(p -> p.isOption() && p.getOptionType().equals("PUT") && p.getQuantity() < 0)
 			.mapToDouble(p -> p.getOptionStrike().doubleValue() * Math.abs(p.getQuantity())).sum() * 100;

@@ -25,7 +25,7 @@ public class Output
 
 	private double sp500YtdReturn;
 
-	private List<Position> positions;
+	private List<OutputPosition> positions;
 
 	private List<MonthlyIncome> income;
 
@@ -131,14 +131,14 @@ public class Output
 		this.sp500YtdReturn = sp500YtdReturn;
 	}
 
-	public List<Position> getPositions()
+	public List<OutputPosition> getPositions()
 	{
 		if (positions == null)
 			positions = new ArrayList<>();
 		return positions;
 	}
 
-	public void setPositions(List<Position> positions)
+	public void setPositions(List<OutputPosition> positions)
 	{
 		this.positions = positions;
 	}

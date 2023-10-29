@@ -111,9 +111,9 @@ function renderOptions(position) {
 		return (
 			<tr key={`pospop-option-${option.symbol}-${i}`}>
 				<td>{Math.abs(option.quantity)}</td>
-				<td>{option.optionType}</td>
-				<td>{option.optionExpiry}</td>
-				<td>{option.optionStrike.toFixed(2)}</td>
+				<td>{option.option.type}</td>
+				<td>{option.option.expiryDate.map(n => String(n).padStart(2, "0")).join("/")}</td>
+				<td>{option.option.strike.toFixed(2)}</td>
 			</tr>
 		);
 	});

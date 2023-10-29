@@ -15,9 +15,4 @@ public record Position(String symbol, String description, double quantity, doubl
 	{
 		return costBasis != 0 ? (getMarketValue() / costBasis - 1) * 100 : 0;
 	}
-
-	public boolean isOption()
-	{
-		return option != null;
-	}
 }

@@ -6,9 +6,10 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.roddyaj.portfoliomanager.model.Order;
+import com.roddyaj.portfoliomanager.model.Position;
 
 @JsonInclude(Include.NON_NULL)
-public class Position
+public class OutputPosition
 {
 	private String symbol;
 	private String description;
