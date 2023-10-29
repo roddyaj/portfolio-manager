@@ -46,7 +46,7 @@ public class Position
 	private Integer sharesToBuy;
 	private Integer callsToSell;
 
-	private List<Transaction> transactions;
+	private List<Order> transactions;
 	private List<Order> openOrders;
 	private List<Position> options;
 
@@ -291,17 +291,17 @@ public class Position
 		this.sharesToBuy = sharesToBuy;
 	}
 
-	public List<Transaction> getTransactions()
+	public List<Order> getTransactions()
 	{
 		return transactions;
 	}
 
-	public void setTransactions(List<Transaction> transactions)
+	public void setTransactions(List<Order> transactions)
 	{
 		this.transactions = transactions;
 	}
 
-	public void addTransaction(Transaction transaction)
+	public void addTransaction(Order transaction)
 	{
 		if (transactions == null)
 			transactions = new ArrayList<>();

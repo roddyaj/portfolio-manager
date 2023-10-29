@@ -135,13 +135,13 @@ function renderTransactions(position) {
 		return null;
 
 	const rows = position.transactions.slice(0, 10).map((transaction, i) => {
-		const action = transaction.action.replace("_TO_OPEN", transaction.type === "C" ? " Call" : " Put");
+		const action = transaction.transactionType.replace("_TO_OPEN", transaction.option?.type === "CALL" ? " Call" : " Put");
 		return (
 			<tr key={`pospop-transaction-${position.symbol}-${i}`}>
-				<td>{transaction.date}</td>
+				<td>{transaction.date.map(n => String(n).padStart(2, "0")).join("/")}</td>
 				<td className='l'>{action}</td>
 				<td>{transaction.quantity}</td>
-				<td>{transaction.strike ? transaction.strike.toFixed(2) : transaction.price.toFixed(2)}</td>
+				<td>{transaction.option?.strike ? transaction.option.strike.toFixed(2) : transaction.price.toFixed(2)}</td>
 			</tr>
 		);
 	});

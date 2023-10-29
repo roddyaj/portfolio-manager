@@ -34,7 +34,6 @@ import com.roddyaj.portfoliomanager.output.MonthlyIncome;
 import com.roddyaj.portfoliomanager.output.Output;
 import com.roddyaj.portfoliomanager.output.Position;
 import com.roddyaj.portfoliomanager.output.PutToSell;
-import com.roddyaj.portfoliomanager.output.Transaction;
 import com.roddyaj.portfoliomanager.settings.AccountSettings;
 import com.roddyaj.portfoliomanager.settings.Allocation;
 import com.roddyaj.portfoliomanager.settings.Api;
@@ -103,7 +102,7 @@ public final class PortfolioManager
 		for (Position position : allPositions)
 		{
 			String symbol = position.getSymbol();
-			position.setTransactions(symbolToTransactions.getOrDefault(symbol, List.of()).stream().map(PortfolioManager::toTransaction).toList());
+			position.setTransactions(symbolToTransactions.getOrDefault(symbol, List.of()));
 			position.setOpenOrders(symbolToOrders.getOrDefault(symbol, List.of()));
 			position.setOptions(symbolToOptions.getOrDefault(symbol, List.of()).stream().map(PortfolioManager::toPosition).toList());
 
@@ -199,22 +198,6 @@ public final class PortfolioManager
 			position.setOption(true);
 		}
 		return position;
-	}
-
-	private static Transaction toTransaction(Order schwabTransaction)
-	{
-		Transaction transaction = new Transaction();
-		transaction.setDate(schwabTransaction.date().toString());
-		transaction.setAction(schwabTransaction.transactionType().toString());
-		transaction.setQuantity(schwabTransaction.quantity());
-		transaction.setPrice(schwabTransaction.price());
-		transaction.setAmount(schwabTransaction.getAmount());
-		if (schwabTransaction.option() != null)
-		{
-			transaction.setStrike(schwabTransaction.option().strike());
-			transaction.setType(schwabTransaction.option().type().toString().substring(0, 1));
-		}
-		return transaction;
 	}
 
 	private List<Position> getNewPositions(Portfolio portfolio, AllocationMap allocationMap)
