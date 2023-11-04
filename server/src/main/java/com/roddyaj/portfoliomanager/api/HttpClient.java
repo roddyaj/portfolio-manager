@@ -2,7 +2,8 @@ package com.roddyaj.portfoliomanager.api;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
@@ -164,9 +165,9 @@ public class HttpClient
 	{
 		try
 		{
-			return new URL(url).getHost();
+			return new URI(url).toURL().getHost();
 		}
-		catch (MalformedURLException e)
+		catch (MalformedURLException | URISyntaxException e)
 		{
 			System.err.println(e);
 			return url;
