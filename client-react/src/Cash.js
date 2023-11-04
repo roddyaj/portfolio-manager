@@ -19,6 +19,8 @@ function Cash(props) {
 					<tr><td className="l"><span style={{ display: "inline-block" }} /></td><td></td></tr>
 					<tr><td className="l">To sell</td><td>{sellTotal.toFixed(2)}</td></tr>
 					<tr><td className="l">To buy</td><td>{buyTotal.toFixed(2)}</td></tr>
+					<tr><td className="l"><span style={{ display: "inline-block" }} /></td><td></td></tr>
+					<tr><td className="l">BTC</td><td>{(portfolio.btcBalance / portfolio.btcPrice).toFixed(3)} ({(100 * portfolio.btcBalance / portfolio.balance).toFixed(2)}%)</td></tr>
 				</tbody>
 			</table>
 		</div>

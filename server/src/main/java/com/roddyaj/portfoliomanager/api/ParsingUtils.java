@@ -77,6 +77,9 @@ public final class ParsingUtils
 
 	public static List<CSVRecord> readCsv(Path path, int headerLine)
 	{
+		if (path == null)
+			return List.of();
+
 		List<String> lines;
 		try
 		{

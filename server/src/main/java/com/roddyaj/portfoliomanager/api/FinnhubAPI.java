@@ -49,6 +49,22 @@ public class FinnhubAPI implements QuoteProvider
 		return time != 0 ? new Quote(price, previousClose, change, changePct, open, high, low, Instant.ofEpochSecond(time)) : null;
 	}
 
+	public double getPrice(String symbol, double defaultPrice)
+	{
+		double price = defaultPrice;
+		try
+		{
+			Quote quote = getQuote(symbol);
+			if (quote != null)
+				price = quote.price();
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+		}
+		return price;
+	}
+
 	public JsonNode getCompanyProfile2(String symbol) throws IOException
 	{
 		return request(symbol, "stock/profile2", Duration.ofDays(30));
@@ -58,6 +74,7 @@ public class FinnhubAPI implements QuoteProvider
 	{
 		String url = new StringBuilder(urlRoot).append(function).append("?token=").append(apiKey).append("&symbol=").append(symbol).toString();
 		Response response = HttpClient.SHARED_INSTANCE.get(url, requestLimitPerMinute, maxStale);
+		System.out.println(response.getCode() + ": " + response.getBody());
 		return new ObjectMapper().readTree(response.getBody());
 	}
 

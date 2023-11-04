@@ -19,6 +19,10 @@ public class Output
 
 	private double cashAvailable;
 
+	private double btcBalance;
+
+	private double btcPrice;
+
 	private double portfolioReturn;
 
 	private long positionsTime;
@@ -99,6 +103,26 @@ public class Output
 	public void setCashAvailable(double cashAvailable)
 	{
 		this.cashAvailable = cashAvailable;
+	}
+
+	public double getBtcBalance()
+	{
+		return btcBalance;
+	}
+
+	public void setBtcBalance(double btcBalance)
+	{
+		this.btcBalance = btcBalance;
+	}
+
+	public double getBtcPrice()
+	{
+		return btcPrice;
+	}
+
+	public void setBtcPrice(double btcPrice)
+	{
+		this.btcPrice = btcPrice;
 	}
 
 	public double getPortfolioReturn()

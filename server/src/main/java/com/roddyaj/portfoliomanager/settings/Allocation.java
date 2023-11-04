@@ -8,6 +8,8 @@ public class Allocation
 	private String cat;
 	private double percent;
 	private Double minOrder;
+	private boolean sell = true;
+	private double sellLimit;
 
 	public Allocation()
 	{
@@ -58,6 +60,26 @@ public class Allocation
 	public void setMinOrder(Double minOrder)
 	{
 		this.minOrder = minOrder;
+	}
+
+	public boolean isSell()
+	{
+		return sell;
+	}
+
+	public void setSell(boolean sell)
+	{
+		this.sell = sell;
+	}
+
+	public double getSellLimit()
+	{
+		return sellLimit;
+	}
+
+	public void setSellLimit(double sellLimit)
+	{
+		this.sellLimit = sellLimit;
 	}
 
 	@Override
