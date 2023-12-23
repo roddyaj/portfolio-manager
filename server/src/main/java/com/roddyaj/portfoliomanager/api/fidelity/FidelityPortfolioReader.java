@@ -6,6 +6,7 @@ import java.nio.file.Path;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -34,7 +35,7 @@ public class FidelityPortfolioReader implements PortfolioReader
 		return new Portfolio(
 			positionInfo.positions(),
 			readOpenOrders(dir),
-			readTransactions(),
+			readTransactions(dir, accountNumber),
 			positionInfo.cash(),
 			positionInfo.balance(),
 			positionInfo.time());
@@ -134,9 +135,47 @@ public class FidelityPortfolioReader implements PortfolioReader
 		return orders;
 	}
 
-	private List<Order> readTransactions()
+	private List<Order> readTransactions(Path dir, String accountNumber)
 	{
-		return List.of();
+		String pattern = "History_for_Account_" + accountNumber + ".*\\.csv";
+		Comparator<Path> comparator = (p1, p2) -> ParsingUtils.getFileTime(p2).compareTo(ParsingUtils.getFileTime(p1));
+		Path file = ParsingUtils.getFile(dir, pattern, comparator);
+		return ParsingUtils.readCsv(file, 5).stream().map(FidelityPortfolioReader::convertTransaction).filter(t -> t != null).toList();
+	}
+
+	private static Order convertTransaction(CSVRecord record)
+	{
+		if (record.size() <= 1)
+			return null;
+
+		String symbol = ParsingUtils.parseString(record.get("Symbol").trim());
+		double quantity = Math.abs(ParsingUtils.parseDouble(record.get("Quantity"), 0));
+		Double price = ParsingUtils.parseDouble(record.get("Price ($)"));
+		double amount = Math.abs(ParsingUtils.parseDouble(record.get("Amount ($)"), 0));
+
+		// @formatter:off
+		return new Order(
+			symbol,
+			convertTransactionType(record.get("Action").trim()),
+			price == null ? 1 : quantity,
+			price == null ? amount : price,
+			null,
+			ParsingUtils.parseDate(record.get("Run Date").trim()),
+			null
+		);
+		// @formatter:on
+	}
+
+	private static TransactionType convertTransactionType(String action)
+	{
+		TransactionType type = null;
+		if (action.startsWith("YOU BOUGHT"))
+			type = TransactionType.BUY;
+		else if (action.startsWith("YOU SOLD"))
+			type = TransactionType.SELL;
+		else if (action.startsWith("DIVIDEND"))
+			type = TransactionType.DIVIDEND;
+		return type;
 	}
 
 	private record PositionInfo(List<Position> positions, double cash, double balance, ZonedDateTime time) {};

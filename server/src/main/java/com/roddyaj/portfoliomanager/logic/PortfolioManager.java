@@ -18,10 +18,8 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.roddyaj.portfoliomanager.api.FinnhubAPI;
 import com.roddyaj.portfoliomanager.api.PortfolioReader;
-import com.roddyaj.portfoliomanager.api.SP500ReturnAPI;
 import com.roddyaj.portfoliomanager.api.fidelity.FidelityPortfolioReader;
 import com.roddyaj.portfoliomanager.api.schwab.SchwabPortfolioReader;
 import com.roddyaj.portfoliomanager.model.Message;
@@ -94,7 +92,7 @@ public final class PortfolioManager
 
 		output.setBalance(portfolio.balance());
 		output.setCash(portfolio.cash());
-		output.setPortfolioReturn(calculateReturn(accountSettings, portfolio));
+//		output.setPortfolioReturn(calculateReturn(accountSettings, portfolio));
 		output.setPositionsTime(portfolio.time().toEpochSecond() * 1000);
 
 		List<OutputPosition> allPositions = new ArrayList<>();
@@ -116,14 +114,11 @@ public final class PortfolioManager
 				position.setMarketValue(marketValue);
 				position.setDayChangePct(quote.changePct());
 				position.setGainLossPct(gainLossPct);
-//					position.setPercentOfAccount();
 			}
 
-			JsonNode companyInfo = state.getCompanyInfo(symbol);
-			if (companyInfo != null)
-			{
-				position.setLogo(companyInfo.get("logo").textValue());
-			}
+//			JsonNode companyInfo = state.getCompanyInfo(symbol);
+//			if (companyInfo != null)
+//				position.setLogo(companyInfo.get("logo").textValue());
 
 			Double target = allocationMap.getAllocation(symbol);
 			position.setTargetPct(target != null ? (target.doubleValue() * 100) : null);
@@ -176,7 +171,7 @@ public final class PortfolioManager
 
 		state.setLastRefresh(Instant.now());
 
-		output.setSp500YtdReturn(SP500ReturnAPI.getYtdSp500Return());
+//		output.setSp500YtdReturn(SP500ReturnAPI.getYtdSp500Return());
 
 		return output;
 	}
@@ -309,30 +304,30 @@ public final class PortfolioManager
 		return monthlyIncome;
 	}
 
-	private static double calculateReturn(AccountSettings accountSettings, Portfolio portfolio)
-	{
-		if (portfolio.transactions().isEmpty())
-			return 0;
-
-		final LocalDate startDate = LocalDate.of(2023, 1, 1);
-
-		double A = accountSettings.getStartingBalance();
-		double B = portfolio.balance();
-		List<Order> transfers = portfolio.transactions().stream()
-			.filter(t -> t.transactionType() == TransactionType.TRANSFER && !t.date().isBefore(startDate)).toList();
-		double F = transfers.stream().mapToDouble(Order::getAmount).sum();
-		double weightedF = transfers.stream().mapToDouble(t -> getWeight(t, startDate) * t.getAmount()).sum();
-		double R = (B - A - F) / (A + weightedF);
-		return R;
-	}
-
-	private static double getWeight(Order transaction, LocalDate startDate)
-	{
-		long C = 365;
-		long D = ChronoUnit.DAYS.between(startDate, transaction.date());
-		double W = D >= 0 ? (C - D) / (double)C : 0;
-		return W;
-	}
+//	private static double calculateReturn(AccountSettings accountSettings, Portfolio portfolio)
+//	{
+//		if (portfolio.transactions().isEmpty())
+//			return 0;
+//
+//		final LocalDate startDate = LocalDate.of(2023, 1, 1);
+//
+//		double A = accountSettings.getStartingBalance();
+//		double B = portfolio.balance();
+//		List<Order> transfers = portfolio.transactions().stream()
+//			.filter(t -> t.transactionType() == TransactionType.TRANSFER && !t.date().isBefore(startDate)).toList();
+//		double F = transfers.stream().mapToDouble(Order::getAmount).sum();
+//		double weightedF = transfers.stream().mapToDouble(t -> getWeight(t, startDate) * t.getAmount()).sum();
+//		double R = (B - A - F) / (A + weightedF);
+//		return R;
+//	}
+//
+//	private static double getWeight(Order transaction, LocalDate startDate)
+//	{
+//		long C = 365;
+//		long D = ChronoUnit.DAYS.between(startDate, transaction.date());
+//		double W = D >= 0 ? (C - D) / (double)C : 0;
+//		return W;
+//	}
 
 	private static double calculateCashOnHold(Collection<? extends OutputPosition> positions)
 	{

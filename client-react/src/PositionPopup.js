@@ -1,4 +1,6 @@
-import Popover from 'react-bootstrap/Popover';
+import Popover from "react-bootstrap/Popover";
+
+import { enumToCamelCase } from "./stringUtils";
 
 export function renderPositionPopup(position) {
 	return (
@@ -71,7 +73,7 @@ function renderOpenOrders(position) {
 	const rows = [];
 	rows.push(...sortedOrders.filter(o => o.transactionType.startsWith("SELL")).map((order, i) => (
 		<tr key={`pospop-opensell-${position.symbol}-${i}`}>
-			<td>{order.transactionType}</td>
+			<td>{enumToCamelCase(order.transactionType)}</td>
 			<td>{order.quantity}</td>
 			<td>@</td>
 			<td>{order.option?.strike ? order.option.strike.toFixed(2) : (order.price != null ? order.price.toFixed(2) : "Market")}</td>
@@ -85,7 +87,7 @@ function renderOpenOrders(position) {
 	));
 	rows.push(...sortedOrders.filter(o => o.transactionType.startsWith("BUY")).map((order, i) => (
 		<tr key={`pospop-openbuy-${position.symbol}-${i}`}>
-			<td>{order.transactionType}</td>
+			<td>{enumToCamelCase(order.transactionType)}</td>
 			<td>{order.quantity}</td>
 			<td>@</td>
 			<td>{order.option?.strike ? order.option.strike.toFixed(2) : (order.price != null ? order.price.toFixed(2) : "Market")}</td>
@@ -111,7 +113,7 @@ function renderOptions(position) {
 		return (
 			<tr key={`pospop-option-${option.symbol}-${i}`}>
 				<td>{Math.abs(option.quantity)}</td>
-				<td>{option.option.type}</td>
+				<td>{enumToCamelCase(option.option.type)}</td>
 				<td>{option.option.expiryDate.map(n => String(n).padStart(2, "0")).join("/")}</td>
 				<td>{option.option.strike.toFixed(2)}</td>
 			</tr>
@@ -135,7 +137,7 @@ function renderTransactions(position) {
 		return null;
 
 	const rows = position.transactions.slice(0, 10).map((transaction, i) => {
-		const action = transaction.transactionType.replace("_TO_OPEN", transaction.option?.type === "CALL" ? " Call" : " Put");
+		const action = enumToCamelCase(transaction.transactionType).replace("To Open", transaction.option?.type === "CALL" ? "Call" : "Put");
 		return (
 			<tr key={`pospop-transaction-${position.symbol}-${i}`}>
 				<td>{transaction.date.map(n => String(n).padStart(2, "0")).join("/")}</td>

@@ -74,7 +74,6 @@ public class FinnhubAPI implements QuoteProvider
 	{
 		String url = new StringBuilder(urlRoot).append(function).append("?token=").append(apiKey).append("&symbol=").append(symbol).toString();
 		Response response = HttpClient.SHARED_INSTANCE.get(url, requestLimitPerMinute, maxStale);
-		System.out.println(response.getCode() + ": " + response.getBody());
 		return new ObjectMapper().readTree(response.getBody());
 	}
 

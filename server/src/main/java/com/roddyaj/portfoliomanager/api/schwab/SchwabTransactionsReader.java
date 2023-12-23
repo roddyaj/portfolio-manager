@@ -21,14 +21,9 @@ final class SchwabTransactionsReader
 
 	public static List<Order> readTransactions(Path dir, String accountName, String accountNumber)
 	{
-		String pattern = ".*_Transactions_.*\\.csv";
+		String pattern = "XXXXX" + accountNumber.substring(5) + "_Transactions_.*\\.csv";
 		Comparator<Path> comparator = (p1, p2) -> getTime(p2).compareTo(getTime(p1));
-		Path file = ParsingUtils.getFile(dir, accountName + pattern, comparator);
-		if (file == null)
-		{
-			String masked = "XXXXX" + accountNumber.substring(5);
-			file = ParsingUtils.getFile(dir, masked + pattern, comparator);
-		}
+		Path file = ParsingUtils.getFile(dir, pattern, comparator);
 		return ParsingUtils.readCsv(file, 0).stream().map(SchwabTransactionsReader::convertTransaction).filter(t -> t.date() != null).toList();
 	}
 
