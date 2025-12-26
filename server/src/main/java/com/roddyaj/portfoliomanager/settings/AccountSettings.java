@@ -11,6 +11,8 @@ public class AccountSettings
 	private String accountNumber;
 	private double maxPosition;
 	private double minOrder;
+	private double buyRatio;
+	private double sellRatio;
 	private double startingBalance;
 	private boolean optionsEnabled = true;
 	private Allocation[] allocations;
@@ -55,6 +57,26 @@ public class AccountSettings
 	public void setMinOrder(double minOrder)
 	{
 		this.minOrder = minOrder;
+	}
+
+	public double getBuyRatio()
+	{
+		return buyRatio;
+	}
+
+	public void setBuyRatio(double buyRatio)
+	{
+		this.buyRatio = buyRatio;
+	}
+
+	public double getSellRatio()
+	{
+		return sellRatio;
+	}
+
+	public void setSellRatio(double sellRatio)
+	{
+		this.sellRatio = sellRatio;
 	}
 
 	public double getStartingBalance()

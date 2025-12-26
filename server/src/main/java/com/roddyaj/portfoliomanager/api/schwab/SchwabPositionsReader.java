@@ -58,11 +58,11 @@ final class SchwabPositionsReader
 		return new Position(
 			symbol,
 			ParsingUtils.parseString(record.get("Description")),
-			price == null ? 1 : ParsingUtils.parseDouble(record.get("Quantity"), 0),
-			price == null ? ParsingUtils.parseDouble(record.get("Market Value"), 0) : price,
-			ParsingUtils.parseDouble(record.get("Day Change %"), 0),
+			price == null ? 1 : ParsingUtils.parseDouble(record.get("Qty (Quantity)"), 0),
+			price == null ? ParsingUtils.parseDouble(record.get("Mkt Val (Market Value)"), 0) : price,
+			ParsingUtils.parseDouble(record.get("Day Chng % (Day Change %)"), 0),
 			ParsingUtils.parseDouble(ParsingUtils.getOrNull(record, "Cost Basis"), 0),
-			ParsingUtils.parseDouble(record.get("% Of Account"), 0),
+			ParsingUtils.parseDouble(record.get("% of Acct (% of Account)"), 0),
 			option
 		);
 		// @formatter:on

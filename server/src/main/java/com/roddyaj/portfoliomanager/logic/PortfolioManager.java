@@ -237,7 +237,7 @@ public final class PortfolioManager
 			boolean allowSell = allocation == null || allocation.isSell();
 			double sellLimit = allocation == null ? 0 : allocation.getSellLimit();
 			double valuePct = position.getMarketValue() / targetValue;
-			boolean doOrder = quantity != 0 && (valuePct < .99 || valuePct > 1.01) && orderAmount >= accountSettings.getMinOrder()
+			boolean doOrder = quantity != 0 && (valuePct < .995 || valuePct > 1.005) && orderAmount >= accountSettings.getMinOrder()
 				&& orderAmount >= positionMinOrder && (quantity > 0 || (allowSell && position.getPrice() >= sellLimit));
 			if (doOrder)
 				sharesToBuy = quantity;
