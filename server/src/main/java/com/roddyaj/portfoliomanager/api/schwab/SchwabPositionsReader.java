@@ -27,7 +27,7 @@ final class SchwabPositionsReader
 
 	public static PositionInfo readPositions(Path dir, String accountName)
 	{
-		String pattern = accountName + ".*-Positions-.*\\.csv";
+		String pattern = accountName.replace('_', ' ') + ".*-Positions-.*\\.csv";
 		Comparator<? super Path> comparator = (p1, p2) -> getTime(p2).compareTo(getTime(p1));
 		Path file = ParsingUtils.getFile(dir, pattern, comparator);
 
