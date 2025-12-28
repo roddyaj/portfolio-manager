@@ -25,7 +25,7 @@ import com.roddyaj.portfoliomanager.model.Position;
 
 public class FidelityPortfolioReader implements PortfolioReader
 {
-	private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("MM/dd/yyyy h:mm a v");
+	private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("MMM-dd-yyyy h:mm a z");
 
 	@Override
 	public Portfolio read(Path dir, String accountName, String accountNumber)
@@ -83,7 +83,7 @@ public class FidelityPortfolioReader implements PortfolioReader
 			Matcher matcher = Pattern.compile("Date downloaded (.+?)\"").matcher(lines.get(lines.size() - 1));
 			if (matcher.find())
 			{
-				time = ZonedDateTime.parse(matcher.group(1), DATE_FORMAT);
+				time = ZonedDateTime.parse(matcher.group(1).replace("a.m", "AM").replace("p.m", "PM"), DATE_FORMAT);
 			}
 		}
 		catch (IOException e)
@@ -99,6 +99,9 @@ public class FidelityPortfolioReader implements PortfolioReader
 
 		Path file = ParsingUtils.getFile(dir, "Activity Orders.*\\.htm",
 			(p1, p2) -> ParsingUtils.getFileTime(p2).compareTo(ParsingUtils.getFileTime(p1)));
+		if (file == null)
+			return orders;
+
 		Pattern pattern = Pattern.compile("(Buy|Sell) (.+?) Shares of (.+?) Limit at \\$(.+?) ");
 		try
 		{
