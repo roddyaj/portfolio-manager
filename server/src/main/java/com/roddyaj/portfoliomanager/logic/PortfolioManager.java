@@ -132,10 +132,10 @@ public final class PortfolioManager
 		output.setOpenBuyAmount(calculateOpenBuyAmount(portfolio.openOrders()));
 		output.setCashAvailable(output.getCash() - output.getCashOnHold() - output.getOpenBuyAmount());
 
-		final Set<String> btcTickers = Set.of("BITO", "GBTC");
+		final Set<String> btcTickers = Set.of("BITB", "BTC", "FBTC", "GBTC", "IBIT");
 		output.setBtcBalance(portfolio.positions().stream().filter(p -> p.option() == null && btcTickers.contains(p.symbol()))
 			.mapToDouble(Position::getMarketValue).sum());
-		output.setBtcPrice(finnhubAPI.getPrice("COINBASE:BTC-USD", 0));
+		// output.setBtcPrice(finnhubAPI.getPrice("COINBASE:BTC-USD", 0));
 
 		if (accountSettings.isOptionsEnabled())
 		{
@@ -237,7 +237,7 @@ public final class PortfolioManager
 			boolean allowSell = allocation == null || allocation.isSell();
 			double sellLimit = allocation == null ? 0 : allocation.getSellLimit();
 			double valuePct = position.getMarketValue() / targetValue;
-			boolean doOrder = quantity != 0 && (valuePct < .995 || valuePct > 1.005) && orderAmount >= accountSettings.getMinOrder()
+			boolean doOrder = quantity != 0 && (valuePct < .999 || valuePct > 1.001) && orderAmount >= accountSettings.getMinOrder()
 				&& orderAmount >= positionMinOrder && (quantity > 0 || (allowSell && position.getPrice() >= sellLimit));
 			if (doOrder)
 				sharesToBuy = quantity;

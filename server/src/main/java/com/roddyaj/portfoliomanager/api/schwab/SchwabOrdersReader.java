@@ -15,7 +15,7 @@ final class SchwabOrdersReader
 {
 	public static List<Order> readOpenOrders(Path dir, String accountName, String accountNumber)
 	{
-		String pattern = accountName.replace('_', ' ') + "XXXX" + accountNumber.substring(4) + "_Order_Status_.*\\.csv";
+		String pattern = accountName.replace('_', ' ') + "XXXXX" + accountNumber.substring(5) + "_Order_Status_.*\\.csv";
 		Comparator<Path> comparator = (p1, p2) -> ParsingUtils.getFileTime(p2).compareTo(ParsingUtils.getFileTime(p1));
 		Path file = ParsingUtils.getFile(dir, pattern, comparator);
 		return ParsingUtils.readCsv(file, 0).stream().map(SchwabOrdersReader::convertOpenOrder).toList();

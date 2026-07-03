@@ -31,12 +31,12 @@ final class SchwabPositionsReader
 		Comparator<? super Path> comparator = (p1, p2) -> getTime(p2).compareTo(getTime(p1));
 		Path file = ParsingUtils.getFile(dir, pattern, comparator);
 
-		List<String> specialSymbols = List.of("Cash & Cash Investments", "Account Total");
+		List<String> specialSymbols = List.of("Cash & Cash Investments", "Positions Total");
 		Map<Boolean, List<Position>> map = ParsingUtils.readCsv(file, 2).stream().map(SchwabPositionsReader::convertPosition)
 			.collect(Collectors.partitioningBy(p -> specialSymbols.contains(p.symbol())));
 		List<Position> positions = map.get(false);
 		List<Position> otherPositions = map.get(true);
-		Position balancePosition = otherPositions.stream().filter(p -> "Account Total".equals(p.symbol())).findAny().orElse(null);
+		Position balancePosition = otherPositions.stream().filter(p -> "Positions Total".equals(p.symbol())).findAny().orElse(null);
 		double balance = balancePosition != null ? balancePosition.getMarketValue() : 0;
 		Position cashPosition = otherPositions.stream().filter(p -> "Cash & Cash Investments".equals(p.symbol())).findAny().orElse(null);
 		double cash = cashPosition != null ? cashPosition.getMarketValue() : 0;

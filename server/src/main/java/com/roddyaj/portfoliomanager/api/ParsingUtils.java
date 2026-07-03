@@ -214,7 +214,7 @@ public final class ParsingUtils
 
 	private static String sanitize(String value)
 	{
-		return value.replace(",", "").replace("$", "").replace("%", "");
+		return value.replace(",", "").replace("$", "").replace("%", "").replace("=", "").replace("\"", "");
 	}
 
 	private ParsingUtils()
