@@ -1,5 +1,5 @@
 import { useState } from "react";
-import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
+import { Button, OverlayTrigger } from 'react-bootstrap';
 
 import DataTable from './DataTable';
 import { renderPositionPopup } from './PositionPopup';
@@ -43,10 +43,16 @@ const columns = [
 		getValue: p => p.sharesToBuy * p.price,
 		render: r => {
 			const action = r.record.sharesToBuy > 0 ? "Buy" : "Sell";
+			const variant = r.record.sharesToBuy > 0 ? "success" : "danger";
 			return (
 				<td key={r.key} className={r.column.align}>
-					<a href={`https://client.schwab.com/Areas/Trade/Allinone/index.aspx?tradeaction=${action}&Symbol=${r.record.symbol}`}>
-						<button style={{ minWidth: 55 }} onClick={() => copyClip(Math.abs(r.record.sharesToBuy))}>{`${action} ${Math.abs(r.record.sharesToBuy)}`}</button>
+					<a href={`https://client.schwab.com/Areas/Trade/Allinone/index.aspx?tradeaction=${action}&Symbol=${r.record.symbol}`}
+						type="button"
+						className={`btn btn-${variant} btn-sm`}
+						style={{ padding: "3px 6px", lineHeight: 1, minWidth: 56 }}
+						onClick={() => copyClip(Math.abs(r.record.sharesToBuy))}
+					>
+						{`${action} ${Math.abs(r.record.sharesToBuy)}`}
 					</a>
 				</td>
 			);
