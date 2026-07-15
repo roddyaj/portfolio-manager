@@ -57,17 +57,17 @@ public class FidelityPortfolioReader implements PortfolioReader
 
 	private static Position convertPosition(CSVRecord record)
 	{
-		Double price = ParsingUtils.parseDouble(record.get("Last Price"));
+		Double price = ParsingUtils.parseDouble(record.get("Last price"));
 
 		// @formatter:off
 		return new Position(
 			record.get("Symbol"),
 			ParsingUtils.parseString(record.get("Description")),
 			price == null ? 1 : ParsingUtils.parseDouble(record.get("Quantity"), 0),
-			price == null ? ParsingUtils.parseDouble(record.get("Current Value"), 0) : price,
-			ParsingUtils.parseDouble(record.get("Today's Gain/Loss Percent"), 0),
-			ParsingUtils.parseDouble(ParsingUtils.getOrNull(record, "Cost Basis Total"), 0),
-			ParsingUtils.parseDouble(record.get("Percent Of Account"), 0),
+			price == null ? ParsingUtils.parseDouble(record.get("Current value"), 0) : price,
+			ParsingUtils.parseDouble(record.get("Today's gain/loss percent"), 0),
+			ParsingUtils.parseDouble(ParsingUtils.getOrNull(record, "Cost basis total"), 0),
+			ParsingUtils.parseDouble(record.get("Percent of account"), 0),
 			null
 		);
 		// @formatter:on
