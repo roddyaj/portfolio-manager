@@ -68,7 +68,7 @@ This is the central orchestrator (`logic/PortfolioManager.java`), called fresh o
 `api/FinnhubAPI.java` fetches live quotes/prices, rate-limited per `Api` settings (`requestsPerMinute`). `SP500ReturnAPI` exists but is currently unused (caller commented out in `PortfolioManager`).
 
 ### Frontend
-Plain CRA app, no router, no state library — `App.js` fetches `/accounts` then `/portfolio?accountName=...` from `http://localhost:8090` directly (hardcoded host/port) and passes the resulting JSON down through props to display components (`Positions2`, `Options`, `Cash`, `Income`, `PutsToSell`, `TitleBar`). `Positions.js` is an older/unused version superseded by `Positions2.js`.
+Plain CRA app, no router, no state library — `App.js` fetches `/accounts` then `/portfolio?accountName=...` from `http://localhost:8090` directly (hardcoded host/port) and passes the resulting JSON down through props to display components (`Positions`, `Options`, `Cash`, `Income`, `PutsToSell`, `TitleBar`).
 
 ## Code style notes (server)
 Existing Java code uses tabs for indentation and Allman-style braces (opening brace on its own line) — match this when editing existing files.

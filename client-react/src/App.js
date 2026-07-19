@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import TitleBar from './TitleBar'
-import Positions2 from "./Positions2";
+import Positions from "./Positions";
 import Options from './Options'
 import Cash from "./Cash";
 import Income from './Income'
@@ -50,7 +50,7 @@ function App() {
 	}
 
 	return (
-		<div>
+		<div className="pm-column">
 			<TitleBar
 				accounts={accounts}
 				selectedAccount={selectedAccount}
@@ -63,15 +63,17 @@ function App() {
 				portfolio ? (
 					<div className="pm-row">
 						<div className="pm-column">
-							<Positions2 portfolio={portfolio} />
+							<Positions portfolio={portfolio} />
 						</div>
-						<div className="pm-column">
-							<PutsToSell portfolio={portfolio} />
-							<Options portfolio={portfolio} isLong={false} type="Calls" />
-							<Options portfolio={portfolio} isLong={false} type="Puts" />
-							<Options portfolio={portfolio} isLong={true} type="Calls" />
-							<Options portfolio={portfolio} isLong={true} type="Puts" />
-						</div>
+						{portfolio.optionsEnabled && (
+							<div className="pm-column">
+								<PutsToSell portfolio={portfolio} />
+								<Options portfolio={portfolio} isLong={false} type="Calls" />
+								<Options portfolio={portfolio} isLong={false} type="Puts" />
+								<Options portfolio={portfolio} isLong={true} type="Calls" />
+								<Options portfolio={portfolio} isLong={true} type="Puts" />
+							</div>
+						)}
 						<div className="pm-column">
 							<Cash portfolio={portfolio} />
 							<Income portfolio={portfolio} />

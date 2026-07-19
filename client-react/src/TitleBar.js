@@ -15,7 +15,7 @@ function TitleBar(props) {
 					</select>
 				</div>
 
-				<button style={{ marginLeft: 12 }} onClick={() => requestPortfolio(selectedAccount)}><i className="bi bi-arrow-clockwise"></i></button>
+				<button className="btn btn-sm btn-primary" style={{ padding: "3px 6px", lineHeight: 1, marginLeft: 12 }} onClick={() => requestPortfolio(selectedAccount)}><i className="bi bi-arrow-clockwise"></i></button>
 				{/* <button style={{ marginLeft: 6 }} onClick={() => stopPolling()}><i className="bi bi-stop-fill"></i></button> */}
 
 				{

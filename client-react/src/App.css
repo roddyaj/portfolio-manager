@@ -4,18 +4,14 @@
 	--block-bg-color: #FFF;
 	--line-color: #AAA;
 	--border: 1px solid var(--line-color);
+	--spacing: 0.5rem;
 }
 
 body {
-	margin: 8px;
+	margin: var(--spacing);
 	background-color: var(--bg-color);
 	color: var(--text-color);
-	font: 14px Arial, sans-serif;
-}
-
-table {
-	margin: -2px;
-	/* border-collapse: separate; */
+	font: 16px Arial, sans-serif;
 }
 
 tr:nth-child(even) {
@@ -56,12 +52,13 @@ img {
 .pm-row {
 	display: flex;
 	flex-direction: row;
+	gap: var(--spacing);
 }
 
 .pm-column {
 	display: flex;
 	flex-direction: column;
-	margin-right: 8px;
+	gap: var(--spacing);
 }
 
 .pm-block {
@@ -69,17 +66,16 @@ img {
 	padding: 4px;
 	border-radius: 4px;
 	box-shadow: 0 0 .25rem #AAAA;
-	margin-bottom: 8px;
 }
 
 .pm-heading {
 	display: flex;
 	align-items: center;
-	margin-bottom: 8px;
+	margin-bottom: var(--spacing);
 }
 
 .pm-title {
-	font-size: 16px;
+	font-size: 18px;
 	font-weight: bold;
 }
 
