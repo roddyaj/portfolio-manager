@@ -1,0 +1,12 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "client-react",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["start"],
+      "cwd": "client-react",
+      "port": 3000
+    }
+  ]
+}
