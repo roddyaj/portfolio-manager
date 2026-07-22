@@ -96,7 +96,7 @@ public final class PortfolioManager
 		output.setPositionsTime(portfolio.time().toEpochSecond() * 1000);
 
 		List<OutputPosition> allPositions = new ArrayList<>();
-		allPositions.addAll(portfolio.positions().stream().map(PortfolioManager::toPosition).toList());
+		allPositions.addAll(portfolio.positions().stream().map(p -> toPosition(p, portfolio.balance())).toList());
 		allPositions.addAll(getNewPositions(portfolio, allocationMap));
 		for (OutputPosition position : allPositions)
 		{
@@ -176,7 +176,7 @@ public final class PortfolioManager
 		return output;
 	}
 
-	private static OutputPosition toPosition(Position inputPosition)
+	private static OutputPosition toPosition(Position inputPosition, double accountBalance)
 	{
 		OutputPosition position = new OutputPosition();
 		position.setSymbol(inputPosition.symbol());
@@ -187,7 +187,7 @@ public final class PortfolioManager
 		position.setCostBasis(inputPosition.costBasis());
 		position.setDayChangePct(inputPosition.dayChangePct());
 		position.setGainLossPct(inputPosition.getGainLossPct());
-		position.setPercentOfAccount(inputPosition.percentOfAccount());
+		position.setPercentOfAccount(inputPosition.getMarketValue() / accountBalance * 100);
 		if (inputPosition.option() != null)
 		{
 			position.setUnderlyingPrice(inputPosition.option().getUnderlyingPrice());
