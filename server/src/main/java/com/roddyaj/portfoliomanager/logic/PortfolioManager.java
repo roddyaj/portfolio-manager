@@ -7,6 +7,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -54,7 +55,7 @@ public final class PortfolioManager
 		}
 	}
 
-	public Output process(Path inputDir, String accountName, Settings settings)
+	public Output process(Path inputDir, String accountName, Settings settings, Double dynamicAllocationPct)
 	{
 		String accountNumber = Stream.of(settings.getAccounts()).filter(a -> a.getName().equals(accountName)).map(AccountSettings::getAccountNumber)
 			.findAny().orElse(null);
@@ -63,11 +64,12 @@ public final class PortfolioManager
 		PortfolioReader reader = accountNumber.length() == 9 ? new FidelityPortfolioReader() : new SchwabPortfolioReader();
 		Portfolio portfolio = reader.read(inputDir, accountName, accountNumber);
 
-		Output output = createOutput(accountName, settings, accountSettings, portfolio);
+		Output output = createOutput(accountName, settings, accountSettings, portfolio, dynamicAllocationPct);
 		return output;
 	}
 
-	private Output createOutput(String accountName, Settings settings, AccountSettings accountSettings, Portfolio portfolio)
+	private Output createOutput(String accountName, Settings settings, AccountSettings accountSettings, Portfolio portfolio,
+		Double dynamicAllocationPct)
 	{
 		Output output = new Output();
 		output.setAccountName(accountName);
@@ -79,7 +81,16 @@ public final class PortfolioManager
 		Map<String, List<Order>> symbolToOrders = portfolio.openOrders().stream().collect(Collectors.groupingBy(Order::symbol));
 
 		List<Message> messages = new ArrayList<>();
-		AllocationMap allocationMap = new AllocationMap(accountSettings.getAllocations(), messages);
+		Allocation dynamicAllocation = accountSettings.getDynamicAllocation();
+		Allocation[] allocations = accountSettings.getAllocations();
+		if (dynamicAllocation != null && dynamicAllocationPct != null)
+		{
+			allocations = Arrays.stream(allocations).map(a -> a == dynamicAllocation ? a.copyWithPercent(dynamicAllocationPct) : a)
+				.toArray(Allocation[]::new);
+		}
+		AllocationMap allocationMap = new AllocationMap(allocations, messages);
+		if (dynamicAllocation != null)
+			output.setDynamicAllocationPct(dynamicAllocationPct != null ? dynamicAllocationPct : dynamicAllocation.getPercent());
 
 		State state = State.getInstance();
 

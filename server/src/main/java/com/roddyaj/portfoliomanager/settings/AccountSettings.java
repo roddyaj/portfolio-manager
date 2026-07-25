@@ -137,4 +137,9 @@ public class AccountSettings
 		}
 		return allocationMap.get(symbol);
 	}
+
+	public Allocation getDynamicAllocation()
+	{
+		return allocations == null ? null : Arrays.stream(allocations).filter(Allocation::isDynamic).findFirst().orElse(null);
+	}
 }

@@ -13,6 +13,7 @@ function App() {
 	const [accounts, setAccounts] = useState([]);
 	const [selectedAccount, setSelectedAccount] = useState(null);
 	const [portfolio, setPortfolio] = useState(null);
+	const [dynamicAllocationPct, setDynamicAllocationPct] = useState(null);
 
 	useEffect(() => {
 		const requestAccounts = async () => {
@@ -29,16 +30,30 @@ function App() {
 
 	useEffect(() => {
 		if (selectedAccount) {
-			requestPortfolio(selectedAccount);
+			setDynamicAllocationPct(null);
+			requestPortfolio(selectedAccount, null);
 		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [selectedAccount]);
 
-	function requestPortfolio(accountName) {
+	function requestPortfolio(accountName, overrideDynamicAllocationPct) {
 		const request = async () => {
-			const response = await fetch(`http://localhost:8090/portfolio?accountName=${accountName}`);
+			let url = `http://localhost:8090/portfolio?accountName=${accountName}`;
+			if (overrideDynamicAllocationPct != null) {
+				url += `&dynamicAllocationPct=${overrideDynamicAllocationPct}`;
+			}
+			const response = await fetch(url);
 			return await response.json();
 		};
-		request().then(setPortfolio);
+		request().then((data) => {
+			setPortfolio(data);
+			setDynamicAllocationPct(data.dynamicAllocationPct);
+		});
+	}
+
+	function handleDynamicAllocationChange(value) {
+		setDynamicAllocationPct(value);
+		requestPortfolio(selectedAccount, value);
 	}
 
 	function stopPolling() {
@@ -58,6 +73,8 @@ function App() {
 				portfolio={portfolio}
 				requestPortfolio={requestPortfolio}
 				stopPolling={stopPolling}
+				dynamicAllocationPct={dynamicAllocationPct}
+				onDynamicAllocationChange={handleDynamicAllocationChange}
 			/>
 			{
 				portfolio ? (

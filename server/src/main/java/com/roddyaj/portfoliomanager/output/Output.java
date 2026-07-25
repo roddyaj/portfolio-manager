@@ -29,6 +29,8 @@ public class Output
 
 	private double sp500YtdReturn;
 
+	private Double dynamicAllocationPct;
+
 	private List<OutputPosition> positions;
 
 	private List<MonthlyIncome> income;
@@ -153,6 +155,16 @@ public class Output
 	public void setSp500YtdReturn(double sp500YtdReturn)
 	{
 		this.sp500YtdReturn = sp500YtdReturn;
+	}
+
+	public Double getDynamicAllocationPct()
+	{
+		return dynamicAllocationPct;
+	}
+
+	public void setDynamicAllocationPct(Double dynamicAllocationPct)
+	{
+		this.dynamicAllocationPct = dynamicAllocationPct;
 	}
 
 	public List<OutputPosition> getPositions()

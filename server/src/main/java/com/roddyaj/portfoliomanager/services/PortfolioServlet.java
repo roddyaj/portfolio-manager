@@ -23,7 +23,13 @@ public class PortfolioServlet extends EnhancedServlet
 
 			String accountName = request.getParameter("accountName");
 
-			Output output = new PortfolioManager(state.getSettings()).process(state.getInputDir(), accountName, state.getSettings());
+			String dynamicAllocationPctParam = request.getParameter("dynamicAllocationPct");
+			Double dynamicAllocationPct = dynamicAllocationPctParam != null && !dynamicAllocationPctParam.isBlank()
+				? Double.valueOf(dynamicAllocationPctParam)
+				: null;
+
+			Output output = new PortfolioManager(state.getSettings()).process(state.getInputDir(), accountName, state.getSettings(),
+				dynamicAllocationPct);
 
 			writeJson(output, response);
 		}

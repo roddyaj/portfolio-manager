@@ -10,6 +10,7 @@ public class Allocation
 	private Double minOrder;
 	private boolean sell = true;
 	private double sellLimit;
+	private boolean dynamic;
 
 	public Allocation()
 	{
@@ -80,6 +81,27 @@ public class Allocation
 	public void setSellLimit(double sellLimit)
 	{
 		this.sellLimit = sellLimit;
+	}
+
+	public boolean isDynamic()
+	{
+		return dynamic;
+	}
+
+	public void setDynamic(boolean dynamic)
+	{
+		this.dynamic = dynamic;
+	}
+
+	@JsonIgnore
+	public Allocation copyWithPercent(double newPercent)
+	{
+		Allocation copy = new Allocation(cat, newPercent);
+		copy.minOrder = minOrder;
+		copy.sell = sell;
+		copy.sellLimit = sellLimit;
+		copy.dynamic = dynamic;
+		return copy;
 	}
 
 	@Override
