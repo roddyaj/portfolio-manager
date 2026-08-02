@@ -64,6 +64,9 @@ public final class PortfolioManager
 		PortfolioReader reader = accountNumber.length() == 9 ? new FidelityPortfolioReader() : new SchwabPortfolioReader();
 		Portfolio portfolio = reader.read(inputDir, accountName, accountNumber);
 
+		List<Order> transactions = TransactionHistoryManager.merge(accountName, portfolio.transactions());
+		portfolio = new Portfolio(portfolio.positions(), portfolio.openOrders(), transactions, portfolio.cash(), portfolio.balance(), portfolio.time());
+
 		Output output = createOutput(accountName, settings, accountSettings, portfolio, dynamicAllocationPct);
 		return output;
 	}
