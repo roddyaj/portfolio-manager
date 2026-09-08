@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 import org.apache.commons.csv.CSVFormat;
@@ -36,31 +37,36 @@ public final class TransactionHistoryManager
 
 	/**
 	 * Merges freshly downloaded transactions with the persisted history for the account, writing any newly seen past
-	 * days to history, and returns the full combined list (history + today's downloaded transactions).
+	 * days to history, and returns the full combined list (history + the latest downloaded day's transactions).
+	 * <p>
+	 * The most recent day in the download is never written to history, since the download may have been taken partway
+	 * through that day; it is persisted on a later run, once a newer day is present in the download.
 	 */
 	public static List<Order> merge(String accountName, List<Order> downloaded)
 	{
 		Path file = HISTORY_DIR.resolve(accountName + ".csv");
-		LocalDate today = LocalDate.now();
 
-		List<Order> history = readHistory(file).stream().filter(t -> !today.equals(t.date())).toList();
+		LocalDate latestDate = downloaded.stream().map(Order::date).filter(Objects::nonNull).max(Comparator.naturalOrder()).orElse(null);
+
+		List<Order> history = readHistory(file).stream().filter(t -> !Objects.equals(latestDate, t.date())).toList();
 
 		Set<LocalDate> historyDates = new HashSet<>();
 		for (Order transaction : history)
 			historyDates.add(transaction.date());
 
 		List<Order> undated = downloaded.stream().filter(t -> t.date() == null).toList();
-		List<Order> newHistory = downloaded.stream().filter(t -> t.date() != null && !today.equals(t.date()) && !historyDates.contains(t.date()))
+		List<Order> newHistory = downloaded.stream()
+			.filter(t -> t.date() != null && !t.date().equals(latestDate) && !historyDates.contains(t.date()))
 			.sorted(Comparator.comparing(Order::date)).toList();
-		List<Order> todayTransactions = downloaded.stream().filter(t -> today.equals(t.date())).toList();
+		List<Order> latestTransactions = downloaded.stream().filter(t -> t.date() != null && t.date().equals(latestDate)).toList();
 
 		if (!newHistory.isEmpty())
 			appendHistory(file, newHistory);
 
-		List<Order> merged = new ArrayList<>(history.size() + newHistory.size() + todayTransactions.size() + undated.size());
+		List<Order> merged = new ArrayList<>(history.size() + newHistory.size() + latestTransactions.size() + undated.size());
 		merged.addAll(history);
 		merged.addAll(newHistory);
-		merged.addAll(todayTransactions);
+		merged.addAll(latestTransactions);
 		merged.addAll(undated);
 		merged.sort(Comparator.comparing(Order::date, Comparator.nullsFirst(Comparator.reverseOrder())));
 
