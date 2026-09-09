@@ -11,6 +11,7 @@ public class Allocation
 	private boolean sell = true;
 	private double sellLimit;
 	private boolean dynamic;
+	private String color;
 
 	public Allocation()
 	{
@@ -93,6 +94,16 @@ public class Allocation
 		this.dynamic = dynamic;
 	}
 
+	public String getColor()
+	{
+		return color;
+	}
+
+	public void setColor(String color)
+	{
+		this.color = color;
+	}
+
 	@JsonIgnore
 	public Allocation copyWithPercent(double newPercent)
 	{
@@ -101,6 +112,7 @@ public class Allocation
 		copy.sell = sell;
 		copy.sellLimit = sellLimit;
 		copy.dynamic = dynamic;
+		copy.color = color;
 		return copy;
 	}
 

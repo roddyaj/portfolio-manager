@@ -11,7 +11,7 @@ const columns = [
 		align: "l",
 		getValue: p => p.symbol,
 		render: r => (
-			<td key={r.key} className={r.column.align}>
+			<td key={r.key} className={r.column.align} style={r.record.color ? { backgroundColor: r.record.color } : null}>
 				<a href={`https://client.schwab.com/SymbolRouting.aspx?Symbol=${r.value}`} style={r.record.peRatio < 0 ? { backgroundColor: "#FDD" } : null}>{r.value}</a>
 			</td>
 		),

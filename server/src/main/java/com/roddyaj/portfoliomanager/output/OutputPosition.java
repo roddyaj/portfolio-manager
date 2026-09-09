@@ -46,6 +46,7 @@ public class OutputPosition
 	private Double targetPct;
 	private Integer sharesToBuy;
 	private Integer callsToSell;
+	private String color;
 
 	private List<Order> transactions;
 	private List<Order> openOrders;
@@ -341,5 +342,15 @@ public class OutputPosition
 		if (options == null)
 			options = new ArrayList<>();
 		this.options.add(option);
+	}
+
+	public String getColor()
+	{
+		return color;
+	}
+
+	public void setColor(String color)
+	{
+		this.color = color;
 	}
 }

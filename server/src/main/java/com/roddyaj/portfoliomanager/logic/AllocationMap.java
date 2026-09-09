@@ -16,6 +16,8 @@ public class AllocationMap
 {
 	private final Map<String, Double> allocationMap = new HashMap<>();
 
+	private final Map<String, String> colorMap = new HashMap<>();
+
 	public AllocationMap(Allocation[] allocations, List<Message> messages)
 	{
 		if (allocations == null || allocations.length == 0)
@@ -26,8 +28,13 @@ public class AllocationMap
 
 		// Create a map of category => percent from the config
 		Map<String, Double> map = new HashMap<>();
+		Map<String, String> categoryColors = new HashMap<>();
 		for (Allocation allocation : allocations)
+		{
 			map.put(allocation.getCat(), allocation.getPercent() / 100);
+			if (allocation.getColor() != null)
+				categoryColors.put(allocation.getCat(), allocation.getColor());
+		}
 
 		// Calculate any relative values
 		for (Map.Entry<String, Double> entry : map.entrySet())
@@ -64,6 +71,11 @@ public class AllocationMap
 				if (allocationMap.containsKey(symbol))
 					allocation += allocationMap.get(symbol).doubleValue();
 				allocationMap.put(symbol, allocation);
+
+				// A symbol may be in multiple categories, any one of the colors will do
+				String color = getColor(category, categoryColors);
+				if (color != null)
+					colorMap.putIfAbsent(symbol, color);
 			}
 		}
 
@@ -79,6 +91,11 @@ public class AllocationMap
 	public Double getAllocation(String symbol)
 	{
 		return allocationMap.get(symbol);
+	}
+
+	public String getColor(String symbol)
+	{
+		return colorMap.get(symbol);
 	}
 
 	public Set<String> getSymbols()
@@ -97,6 +114,22 @@ public class AllocationMap
 				allocation *= map.get(partialKey).doubleValue();
 		}
 		return allocation;
+	}
+
+	/**
+	 * Returns the color for the category, cascading up through the parent categories, where the most specific one wins.
+	 */
+	private static String getColor(String category, Map<String, String> categoryColors)
+	{
+		String[] tokens = category.split("\\.");
+		for (int i = tokens.length; i > 0; i--)
+		{
+			String partialKey = String.join(".", Arrays.copyOfRange(tokens, 0, i));
+			String color = categoryColors.get(partialKey);
+			if (color != null)
+				return color;
+		}
+		return null;
 	}
 
 	private static Stream<Map.Entry<String, Double>> getChildren(String parent, Map<String, Double> map)

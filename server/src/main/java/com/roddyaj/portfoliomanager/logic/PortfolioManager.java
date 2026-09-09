@@ -138,6 +138,7 @@ public final class PortfolioManager
 			position.setTargetPct(target != null ? (target.doubleValue() * 100) : null);
 			position.setSharesToBuy(calculateSharesToBuy(position, accountSettings, portfolio.balance(), target));
 			position.setCallsToSell(calculateCallsToSell(position, settings, accountSettings));
+			position.setColor(allocationMap.getColor(symbol));
 
 			output.getPositions().add(position);
 		}
