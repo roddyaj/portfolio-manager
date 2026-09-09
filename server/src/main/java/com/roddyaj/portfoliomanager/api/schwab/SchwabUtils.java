@@ -18,7 +18,7 @@ final class SchwabUtils
 			case "Sell" -> TransactionType.SELL;
 			case "Sell to Open" -> TransactionType.SELL_TO_OPEN;
 			case "Buy to Close" -> TransactionType.BUY_TO_CLOSE;
-			case "Cash Dividend", "Qualified Dividend" -> TransactionType.DIVIDEND;
+			case "Cash Dividend", "Qualified Dividend", "Return Of Capital" -> TransactionType.DIVIDEND;
 			case "Journal", "MoneyLink Deposit", "MoneyLink Transfer", "Funds Received", "Bank Transfer" -> TransactionType.TRANSFER;
 			default -> null;
 		};
